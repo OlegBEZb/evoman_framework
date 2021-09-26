@@ -279,7 +279,7 @@ class Environment(object):
             # loads solutions
             file = gzip.open(self.experiment_name + '/evoman_solstate')
             self.solutions = pickle.load(file, encoding='latin1')
-            self.print_logs("MESSAGE: state has been loaded.")
+            # self.print_logs("MESSAGE: state has been loaded.")
 
         except IOError:
             self.print_logs("ERROR: could not load state.")

@@ -23,7 +23,7 @@ class PlayerController(Controller):
         """
 
         :param inputs: states of the env
-        :param controller: kind of weight
+        :param controller: kind of weights
         :return:
         """
         # Normalises the input using min-max scaling
@@ -33,6 +33,8 @@ class PlayerController(Controller):
         # if self.n_hidden[0] > 0:
         # Preparing the weights and biases from the controller of layer 1
 
+        # TODO: replace with a loop
+        # TODO: migrate to NN?
         # Biases for the n hidden neurons
         bias1 = controller[:self.hidden_layer_sizes[0]].reshape(1, self.hidden_layer_sizes[0])
         # Weights for the connections from the inputs to the hidden nodes
@@ -43,8 +45,8 @@ class PlayerController(Controller):
         output1 = sigmoid_activation(inputs.dot(weights1) + bias1)
 
         # Preparing the weights and biases from the controller of layer 2
-        bias2 = controller[weights1_slice:weights1_slice + 5].reshape(1, 5)
-        weights2 = controller[weights1_slice + 5:].reshape((self.hidden_layer_sizes[0], 5))
+        bias2 = controller[weights1_slice:weights1_slice + self.hidden_layer_sizes[1]].reshape(1, self.hidden_layer_sizes[1])
+        weights2 = controller[weights1_slice + 5:].reshape((self.hidden_layer_sizes[0], self.hidden_layer_sizes[1]))
 
         # Outputting activated second layer. Each entry in the output is an action
         output = sigmoid_activation(output1.dot(weights2) + bias2)[0]

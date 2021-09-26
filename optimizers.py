@@ -1,9 +1,11 @@
-import os, sys
+import os
+import sys
 import numpy as np
 from evoman.environment import Environment
-from deap.tools.crossover import cxOnePoint
 from deap.tools.mutation import mutGaussian
+from deap.tools.crossover import cxOnePoint
 import random
+import csv
 
 
 class EvolutionaryAlgorithm:
@@ -13,22 +15,28 @@ class EvolutionaryAlgorithm:
                  weight_amplitude=1,
                  mating_num=2,
                  population_size=100,
-                 mutation=0.2,
-                 patience=15):
+                 patience=15,
+                 deap_mutation_operator=mutGaussian,
+                 deap_mutation_kwargs={},
+                 deap_crossover_method=cxOnePoint,
+                 deap_crossover_kwargs={}):
 
         self.env = env
 
         self.experiment_name = experiment_name
 
-        # # number of weights for multilayer with 10 hidden neurons
-        self.layer_size = self.env.player_controller.hidden_layer_sizes[0]
-        self.weights_num = (env.get_num_sensors() + 1) * self.layer_size + (self.layer_size + 1) * 5
+        self.layer_sizes = self.env.player_controller.hidden_layer_sizes
+        self.weights_num = (env.get_num_sensors() + 1) * self.layer_sizes[0] + (self.layer_sizes[0] + 1) * self.layer_sizes[1]
 
         self.weight_amplitude = weight_amplitude
         self.population_size = population_size
         self.mating_num = mating_num
-        self.mutation_prob = mutation
         self.patience = patience
+
+        self.deap_mutation_operator = deap_mutation_operator
+        self.deap_mutation_kwargs = deap_mutation_kwargs
+        self.deap_crossover_method = deap_crossover_method
+        self.deap_crossover_kwargs = deap_crossover_kwargs
 
     def initialize_population(self):
         # initializes population loading old solutions or generating new ones
@@ -38,12 +46,23 @@ class EvolutionaryAlgorithm:
             population = np.random.uniform(-self.weight_amplitude, self.weight_amplitude,
                                            (self.population_size, self.weights_num))
             population_fitness = self.evaluate_in_simulation(population)
-            start_generation = 0
             solutions = [population, population_fitness]
             self.env.update_solutions(solutions)
 
-            file_aux = open(self.experiment_name + '/results.txt', 'w')  # new file
-            file_aux.write('\n\ngen best mean std')
+            self.write_to_csv('results.csv',
+                              ['generation', 'best_score', 'fitness_mean', 'fitness_std'],
+                              'w')
+
+            best_individual_id, best_score, fitness_mean, fitness_std, msg = self.get_population_stats(
+                population_fitness, generation_num=0)
+            # saves results for first pop
+            np.savetxt(os.path.join(self.experiment_name, 'best_solution_gen0.txt'),
+                       population[best_individual_id])
+            print(msg)
+            self.write_to_csv('results.csv',
+                              [0, best_score, fitness_mean, fitness_std],
+                              'a')
+            start_generation = 1  # as we have just sampled the 0th gen
         else:
             print('CONTINUING EVOLUTION')
             self.env.load_state()
@@ -51,19 +70,19 @@ class EvolutionaryAlgorithm:
             population_fitness = self.env.solutions[1]
 
             # finds last generation number
-            file_aux = open(self.experiment_name + '/gen.txt', 'r')
-            start_generation = int(file_aux.readline()) + 1
-            file_aux.close()
+            file = open(os.path.join(self.experiment_name, 'results.csv'))
+            reader = csv.reader(file)
+            start_generation = len(list(reader)) - 1
 
-            file_aux = open(self.experiment_name + '/results.txt', 'a')
+            _, best_score, _, _, msg = self.get_population_stats(population_fitness, generation_num=start_generation-1)
 
-        best_individual_id, best_score, fitness_mean, fitness_std, msg = self.get_population_stats(population_fitness, 0)
-        # saves results for first pop
-        print(msg)
-        file_aux.write(msg)
-        file_aux.close()
+        return population, population_fitness, best_score, start_generation
 
-        return population, population_fitness, start_generation
+    def write_to_csv(self, filename, row, mode):
+        # open the file in the write mode
+        with open(os.path.join(self.experiment_name, filename), mode, newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(row)
 
     @staticmethod
     def simulation(env, x):
@@ -129,7 +148,7 @@ class EvolutionaryAlgorithm:
 
             children = []
             for _ in range(self.mating_num):
-                children.extend(cxOnePoint(parent_1, parent_2))
+                children.extend(self.deap_crossover_method(parent_1, parent_2, **self.deap_crossover_kwargs))
 
             offspring = random.sample(children, random.randint(1, len(children)))
             offspring = self.mutation(offspring)
@@ -148,11 +167,10 @@ class EvolutionaryAlgorithm:
         result = []
         for individual in offspring:
             # returns a tuple
-            result.append(mutGaussian(individual, 0, 1, self.mutation_prob)[0])
+            result.append(self.deap_mutation_operator(individual, **self.deap_mutation_kwargs)[0])
         return result
 
     # kills the worst genomes, and replace with new best/random solutions
-    # TODO: reduce to the size of npop
     def doomsday(self, population, population_fitness):
         worst = int(self.population_size / 4)  # a quarter of the population
         order = np.argsort(population_fitness)
@@ -173,10 +191,8 @@ class EvolutionaryAlgorithm:
 
     def train(self, generations=30):
 
-        population, population_fitness, start_generation = self.initialize_population()
+        population, population_fitness, best_score, start_generation = self.initialize_population()
         print("Start generation:", start_generation)
-
-        _, best_score, _, _, _ = self.get_population_stats(population_fitness)
         last_best_score = best_score
         gens_without_improvement = 0
 
@@ -189,6 +205,13 @@ class EvolutionaryAlgorithm:
 
             best_individual_id, best_score, _, _, _ = self.get_population_stats(population_fitness, i)
 
+            if best_score <= last_best_score:
+                gens_without_improvement += 1
+            else:
+                last_best_score = best_score
+                gens_without_improvement = 0
+                np.savetxt(os.path.join(self.experiment_name, f'best_solution_gen{i}.txt'), population[best_individual_id])
+
             # selection
             fit_pop_cp = population_fitness
             fit_pop_norm = np.array(list(map(lambda y: self.norm(y, fit_pop_cp),
@@ -199,19 +222,10 @@ class EvolutionaryAlgorithm:
             population = population[selected_indices]
             population_fitness = population_fitness[selected_indices]
 
-            # searching new areas
-
-            if best_score <= last_best_score:
-                gens_without_improvement += 1
-            else:
-                last_best_score = best_score
-                gens_without_improvement = 0
-                # TODO: save the best solution and its score
-
             if gens_without_improvement >= self.patience:
-                file_aux = open(self.experiment_name + '/results.txt', 'a')
-                file_aux.write('\ndoomsday')
-                file_aux.close()
+                # file_aux = open(self.experiment_name + '/results.txt', 'a')
+                # file_aux.write('\ndoomsday')
+                # file_aux.close()
 
                 population, population_fitness = self.doomsday(population, population_fitness)
                 gens_without_improvement = 0
@@ -219,19 +233,12 @@ class EvolutionaryAlgorithm:
             best_individual_id, best_score, fitness_mean, fitness_std, msg = self.get_population_stats(population_fitness, i)
 
             # saves results
-            file_aux = open(self.experiment_name + '/results.txt', 'a')
             print(msg)
-            file_aux.write('\n' + msg)
-            file_aux.close()
-
-            # saves generation number
-            file_aux = open(self.experiment_name + '/gen.txt', 'w')
-            file_aux.write(str(i))
-            file_aux.close()
+            self.write_to_csv('results.csv', [i, best_score, fitness_mean, fitness_std], 'a')
 
             # saves file with the best solution
             # w1 | w2 | ... | w255 | fitness | generation
-            np.savetxt(self.experiment_name + '/best_solution.txt', population[best_individual_id])
+            # np.savetxt(self.experiment_name + '/best_solution.txt', population[best_individual_id])
 
             # saves simulation state
             solutions = [population, population_fitness]
