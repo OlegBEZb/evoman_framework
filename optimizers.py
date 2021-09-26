@@ -42,7 +42,7 @@ class EvolutionaryAlgorithm:
             solutions = [population, population_fitness]
             self.env.update_solutions(solutions)
 
-            file_aux = open(self.experiment_name + '/results.txt', 'w') # new file
+            file_aux = open(self.experiment_name + '/results.txt', 'w')  # new file
             file_aux.write('\n\ngen best mean std')
         else:
             print('CONTINUING EVOLUTION')
@@ -56,7 +56,6 @@ class EvolutionaryAlgorithm:
             file_aux.close()
 
             file_aux = open(self.experiment_name + '/results.txt', 'a')
-
 
         best_individual_id, best_score, fitness_mean, fitness_std, msg = self.get_population_stats(population_fitness, 0)
         # saves results for first pop
@@ -207,6 +206,7 @@ class EvolutionaryAlgorithm:
             else:
                 last_best_score = best_score
                 gens_without_improvement = 0
+                # TODO: save the best solution and its score
 
             if gens_without_improvement >= self.patience:
                 file_aux = open(self.experiment_name + '/results.txt', 'a')
@@ -230,6 +230,7 @@ class EvolutionaryAlgorithm:
             file_aux.close()
 
             # saves file with the best solution
+            # w1 | w2 | ... | w255 | fitness | generation
             np.savetxt(self.experiment_name + '/best_solution.txt', population[best_individual_id])
 
             # saves simulation state
@@ -251,7 +252,7 @@ class EvolutionaryAlgorithm:
         msg += f"best score: {round(best_score, 3)} mean fitness: {round(fitness_mean, 3)} fitness std: {round(fitness_std, 3)}"
 
         return best_individual_id, best_score, fitness_mean, fitness_std, msg
-    
+
     def test(self):
         # try:
         #     del os.environ['SDL_VIDEODRIVER']

@@ -5,7 +5,7 @@ from environment import Environment
 from demo_controller import PlayerController
 from optimizers import EvolutionaryAlgorithm
 
-experiment_name = 'mating_num4_mut01_pop100'
+experiment_name = 'mating_num2_mut03_pop70'
 if not os.path.exists(experiment_name):
     os.makedirs(experiment_name)
 
@@ -19,17 +19,17 @@ env = Environment(experiment_name=experiment_name,
                   playermode="ai",
                   player_controller=player_controller,
                   enemymode="static",
-                  level=2,
+                  level=3,
                   speed="fastest",
                   visualmode="no",)
 
 ea = EvolutionaryAlgorithm(env=env,
                            experiment_name=experiment_name,
                            weight_amplitude=1,
-                           mating_num=4,
-                           population_size=100,
-                           mutation=0.1,
-                           patience=15)
+                           mating_num=2,
+                           population_size=50,
+                           mutation=0.3,
+                           patience=5)
 ea.train(generations=30)
 
 ea.test()
