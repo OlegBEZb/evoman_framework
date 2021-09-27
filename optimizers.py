@@ -16,6 +16,8 @@ class EvolutionaryAlgorithm:
                  mating_num=2,
                  population_size=100,
                  patience=15,
+                 doomsday_population_ratio=0.25,
+                 doomsday_replace_with_random_prob=0.9,
                  deap_mutation_operator=mutGaussian,
                  deap_mutation_kwargs={},
                  deap_crossover_method=cxOnePoint,
@@ -32,6 +34,9 @@ class EvolutionaryAlgorithm:
         self.population_size = population_size
         self.mating_num = mating_num
         self.patience = patience
+        
+        self.doomsday_population_ratio = doomsday_population_ratio
+        self.doomsday_replace_with_random_prob = doomsday_replace_with_random_prob
 
         self.deap_mutation_operator = deap_mutation_operator
         self.deap_mutation_kwargs = deap_mutation_kwargs
@@ -127,7 +132,7 @@ class EvolutionaryAlgorithm:
 
     def crossover(self, population, population_fitness):
         """
-        Crossover is a genetic operator used to vary the programming of a chromosome or chromosomes from one generation
+        Crossover/recombination is a genetic operator used to vary the programming of a chromosome or chromosomes from one generation
         to the next. Crossover is sexual reproduction. Two strings are picked from the mating pool at random to
         crossover in order to produce superior offspring. The method chosen depends on the Encoding Method.
 
@@ -172,14 +177,16 @@ class EvolutionaryAlgorithm:
 
     # kills the worst genomes, and replace with new best/random solutions
     def doomsday(self, population, population_fitness):
-        worst = int(self.population_size / 4)  # a quarter of the population
+        worst_num = int(self.population_size *self.doomsday_population_ratio)  # a quarter of the population
         order = np.argsort(population_fitness)
-        orderasc = order[0:worst]
+        orderasc = order[0:worst_num]
 
+        new_random_counter = 0
         for o in orderasc:
             for j in range(0, self.weights_num):
-                pro = np.random.uniform(0, 1)
-                if np.random.uniform(0, 1) <= pro:
+                # pro = np.random.uniform(0, 1)
+                if np.random.uniform(0, 1) <= self.doomsday_replace_with_random_prob:
+                    new_random_counter += 1
                     population[o][j] = np.random.uniform(-self.weight_amplitude,
                                                          self.weight_amplitude)  # random dna, uniform dist.
                 else:
@@ -187,12 +194,13 @@ class EvolutionaryAlgorithm:
 
             population_fitness[o] = self.evaluate_in_simulation([population[o]])
 
+        print(f'During the doomsday {new_random_counter} genes were replaced with random ones and {worst_num*self.weights_num - new_random_counter} with the best one')
+
         return population, population_fitness
 
     def train(self, generations=30):
 
         population, population_fitness, best_score, start_generation = self.initialize_population()
-        print("Start generation:", start_generation)
         last_best_score = best_score
         gens_without_improvement = 0
 
