@@ -56,7 +56,7 @@ class EvolutionaryAlgorithm:
             best_individual_id, best_score, fitness_mean, fitness_std, msg = self.get_population_stats(
                 population_fitness, generation_num=0)
             # saves results for first pop
-            np.savetxt(os.path.join(self.experiment_name, 'best_solution_gen0.txt'),
+            np.savetxt(os.path.join(self.experiment_name, 'best_solution.txt'),
                        population[best_individual_id])
             print(msg)
             self.write_to_csv('results.csv',
@@ -210,7 +210,7 @@ class EvolutionaryAlgorithm:
             else:
                 last_best_score = best_score
                 gens_without_improvement = 0
-                np.savetxt(os.path.join(self.experiment_name, f'best_solution_gen{i}.txt'), population[best_individual_id])
+                np.savetxt(os.path.join(self.experiment_name, 'best_solution.txt'), population[best_individual_id])
 
             # selection
             fit_pop_cp = population_fitness
