@@ -6,7 +6,7 @@ from environment import Environment
 from demo_controller import PlayerController
 from optimizers import EvolutionaryAlgorithm
 from deap.tools.mutation import mutGaussian
-from deap.tools.crossover import cxOnePoint, cxUniform
+from deap.tools.crossover import *
 
 if __name__ == "__main__":
     try:
@@ -22,8 +22,9 @@ POPULATION_SIZE = 70
 PATIENCE = 2
 DOOMSDAY_POPULATION_RATIO = 0.3
 DOOMSDAY_REPLACE_WITH_RANDOM_PROB = 0.9
+DEAP_CROSSOVER_METHOD = cxOnePoint
 
-experiment_name = f"experiments/enemy{ENEMY_NUMBER}_mating{MATING_NUM}_pop{POPULATION_SIZE}_patience{PATIENCE}_DPR{DOOMSDAY_POPULATION_RATIO}_DRWRP{DOOMSDAY_REPLACE_WITH_RANDOM_PROB}_mutGaus_03_cxOnePoint_{LAUNCH_NUM}"
+experiment_name = f"experiments/enemy{ENEMY_NUMBER}_mating{MATING_NUM}_pop{POPULATION_SIZE}_patience{PATIENCE}_DPR{DOOMSDAY_POPULATION_RATIO}_DRWRP{DOOMSDAY_REPLACE_WITH_RANDOM_PROB}_mutGaus_mu0sigma1prob03_{DEAP_CROSSOVER_METHOD.__name__}_{LAUNCH_NUM}"
 if not os.path.exists(experiment_name):
     os.makedirs(experiment_name)
 
@@ -50,8 +51,8 @@ ea = EvolutionaryAlgorithm(env=env,
                            doomsday_replace_with_random_prob=DOOMSDAY_REPLACE_WITH_RANDOM_PROB,
                            deap_mutation_operator=mutGaussian,
                            deap_mutation_kwargs={"mu": 0, "sigma": 1, "indpb": 0.3},
-                           deap_crossover_method=cxOnePoint,
+                           deap_crossover_method=DEAP_CROSSOVER_METHOD,
                            deap_crossover_kwargs={})
-ea.train(generations=1)
+ea.train(generations=15)
 
 ea.test()
