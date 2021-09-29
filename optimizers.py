@@ -8,6 +8,8 @@ from deap.tools.crossover import cxOnePoint
 import random
 import csv
 
+from utils import norm
+
 
 class EvolutionaryAlgorithm:
     def __init__(self,
@@ -102,21 +104,9 @@ class EvolutionaryAlgorithm:
         fitness, player_life, enemy_life, time = env.play(pcont=x)
         return fitness
 
-    @staticmethod
-    def norm(x, pfit_pop):
-        if (max(pfit_pop) - min(pfit_pop)) > 0:
-            x_norm = (x - min(pfit_pop)) / (max(pfit_pop) - min(pfit_pop))
-        else:
-            x_norm = 0
-
-        if x_norm <= 0:
-            x_norm = 0.0000000001
-        return x_norm
-
     def evaluate_in_simulation(self, x):
         # simulates each of x
         return np.array(list(map(lambda y: self.simulation(self.env, y), x)))
-
 
     def crossover(self, population, population_fitness):
         """
@@ -212,8 +202,7 @@ class EvolutionaryAlgorithm:
                 np.savetxt(os.path.join(self.experiment_name, 'best_solution.txt'), population[best_individual_id])
 
             # selection
-            fit_pop_cp = population_fitness
-            fit_pop_norm = np.array(list(map(lambda y: self.norm(y, fit_pop_cp),
+            fit_pop_norm = np.array(list(map(lambda y: norm(y, population_fitness),
                                              population_fitness)))  # avoiding negative probabilities, as fitness is ranges from negative numbers
             probs = (fit_pop_norm) / (fit_pop_norm).sum()
             selected_indices = np.random.choice(population.shape[0], self.population_size - 1, p=probs, replace=False)
