@@ -18,11 +18,11 @@ if __name__ == "__main__":
 
 
 MATING_NUM = 4
-POPULATION_SIZE = 70
-PATIENCE = 2
-DOOMSDAY_POPULATION_RATIO = 0.3
-DOOMSDAY_REPLACE_WITH_RANDOM_PROB = 0.9
-DEAP_CROSSOVER_METHOD = cxOnePoint
+POPULATION_SIZE = 100
+PATIENCE = 3
+DOOMSDAY_POPULATION_RATIO = 0.4
+DOOMSDAY_REPLACE_WITH_RANDOM_PROB = 0.85
+DEAP_CROSSOVER_METHOD = cxUniform
 
 experiment_name = f"experiments/enemy{ENEMY_NUMBER}_mating{MATING_NUM}_pop{POPULATION_SIZE}_patience{PATIENCE}_DPR{DOOMSDAY_POPULATION_RATIO}_DRWRP{DOOMSDAY_REPLACE_WITH_RANDOM_PROB}_mutGaus_mu0sigma1prob03_{DEAP_CROSSOVER_METHOD.__name__}_{LAUNCH_NUM}"
 if not os.path.exists(experiment_name):
@@ -39,7 +39,8 @@ env = Environment(experiment_name=experiment_name,
                   enemymode="static",
                   level=2,
                   speed="fastest",
-                  visualmode="no", )
+                  visualmode="no",
+                  randomini='yes')
 
 ea = EvolutionaryAlgorithm(env=env,
                            experiment_name=experiment_name,
@@ -52,7 +53,7 @@ ea = EvolutionaryAlgorithm(env=env,
                            deap_mutation_operator=mutGaussian,
                            deap_mutation_kwargs={"mu": 0, "sigma": 1, "indpb": 0.3},
                            deap_crossover_method=DEAP_CROSSOVER_METHOD,
-                           deap_crossover_kwargs={})
-ea.train(generations=15)
+                           deap_crossover_kwargs={"indpb": 0.5})
+ea.train(generations=20)
 
-ea.test()
+ea.test(n_times=5)

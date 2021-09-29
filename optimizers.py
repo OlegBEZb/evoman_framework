@@ -21,20 +21,21 @@ class EvolutionaryAlgorithm:
                  deap_mutation_operator=mutGaussian,
                  deap_mutation_kwargs={},
                  deap_crossover_method=cxOnePoint,
-                 deap_crossover_kwargs={}):
+                 deap_crossover_kwargs={}, ):
 
         self.env = env
 
         self.experiment_name = experiment_name
 
         self.layer_sizes = self.env.player_controller.hidden_layer_sizes
-        self.weights_num = (env.get_num_sensors() + 1) * self.layer_sizes[0] + (self.layer_sizes[0] + 1) * self.layer_sizes[1]
+        self.weights_num = (env.get_num_sensors() + 1) * self.layer_sizes[0] + (self.layer_sizes[0] + 1) * \
+                           self.layer_sizes[1]
 
         self.weight_amplitude = weight_amplitude
         self.population_size = population_size
         self.mating_num = mating_num
         self.patience = patience
-        
+
         self.doomsday_population_ratio = doomsday_population_ratio
         self.doomsday_replace_with_random_prob = doomsday_replace_with_random_prob
 
@@ -79,7 +80,8 @@ class EvolutionaryAlgorithm:
             reader = csv.reader(file)
             start_generation = len(list(reader)) - 1
 
-            _, best_score, _, _, msg = self.get_population_stats(population_fitness, generation_num=start_generation-1)
+            _, best_score, _, _, msg = self.get_population_stats(population_fitness,
+                                                                 generation_num=start_generation - 1)
 
         return population, population_fitness, best_score, start_generation
 
@@ -177,7 +179,7 @@ class EvolutionaryAlgorithm:
 
     # kills the worst genomes, and replace with new best/random solutions
     def doomsday(self, population, population_fitness):
-        worst_num = int(self.population_size *self.doomsday_population_ratio)  # a quarter of the population
+        worst_num = int(self.population_size * self.doomsday_population_ratio)  # a quarter of the population
         order = np.argsort(population_fitness)
         orderasc = order[0:worst_num]
 
@@ -194,7 +196,8 @@ class EvolutionaryAlgorithm:
 
             population_fitness[o] = self.evaluate_in_simulation([population[o]])
 
-        print(f'During the doomsday {new_random_counter} genes were replaced with random ones and {worst_num*self.weights_num - new_random_counter} with the best one')
+        print(
+            f'During the doomsday {new_random_counter} genes were replaced with random ones and {worst_num * self.weights_num - new_random_counter} with the best one')
 
         return population, population_fitness
 
@@ -238,7 +241,8 @@ class EvolutionaryAlgorithm:
                 population, population_fitness = self.doomsday(population, population_fitness)
                 gens_without_improvement = 0
 
-            best_individual_id, best_score, fitness_mean, fitness_std, msg = self.get_population_stats(population_fitness, i)
+            best_individual_id, best_score, fitness_mean, fitness_std, msg = self.get_population_stats(
+                population_fitness, i)
 
             # saves results
             print(msg)
@@ -268,16 +272,21 @@ class EvolutionaryAlgorithm:
 
         return best_individual_id, best_score, fitness_mean, fitness_std, msg
 
-    def test(self):
+    def test(self, n_times=5):
         # try:
         #     del os.environ['SDL_VIDEODRIVER']
         # except:
         #     raise
         # loads file with the best solution for testing
+        fitness_list = []
         best_solution = np.loadtxt(self.experiment_name + '/best_solution.txt')
-        print('RUNNING SAVED BEST SOLUTION')
-        self.env.update_parameter('speed', 'normal')
-        self.env.update_parameter('visualmode', 'yes')
-        self.evaluate_in_simulation([best_solution])
+        for i in range(n_times):
+            print('RUNNING SAVED BEST SOLUTION')
+            self.env.update_parameter('speed', 'normal')
+            self.env.update_parameter('visualmode', 'yes')
+            fitness = self.evaluate_in_simulation([best_solution])
+            fitness_list.append(fitness)
+
+        np.savetxt(os.path.join(self.experiment_name, 'test_results.txt'), fitness_list)
 
         sys.exit(0)
