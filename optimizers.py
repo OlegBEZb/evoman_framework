@@ -2,6 +2,7 @@ import os
 import sys
 import numpy as np
 from evoman.environment import Environment
+from selection import selRandom
 from deap.tools.mutation import mutGaussian
 from deap.tools.crossover import cxOnePoint
 import random
@@ -16,6 +17,8 @@ class EvolutionaryAlgorithm:
                  mating_num=2,
                  population_size=100,
                  patience=15,
+                 tournament_method=selRandom,
+                 tournament_kwargs={"k": 2},
                  doomsday_population_ratio=0.25,
                  doomsday_replace_with_random_prob=0.9,
                  deap_mutation_operator=mutGaussian,
@@ -35,6 +38,9 @@ class EvolutionaryAlgorithm:
         self.population_size = population_size
         self.mating_num = mating_num
         self.patience = patience
+
+        self.tournament_method = tournament_method
+        self.tournament_kwargs = tournament_kwargs
 
         self.doomsday_population_ratio = doomsday_population_ratio
         self.doomsday_replace_with_random_prob = doomsday_replace_with_random_prob
@@ -111,26 +117,6 @@ class EvolutionaryAlgorithm:
         # simulates each of x
         return np.array(list(map(lambda y: self.simulation(self.env, y), x)))
 
-    def tournament(self, population, population_fitness):
-        """
-        Randomly picks two individuals from the population and returns the better
-
-        Parameters
-        ----------
-        population_fitness
-        population
-
-        Returns
-        -------
-
-        """
-        idx1 = np.random.randint(0, population.shape[0])
-        idx2 = np.random.randint(0, population.shape[0])
-
-        if population_fitness[idx1] > population_fitness[idx2]:
-            return population[idx1]
-        else:
-            return population[idx2]
 
     def crossover(self, population, population_fitness):
         """
@@ -150,8 +136,10 @@ class EvolutionaryAlgorithm:
         total_offspring = np.zeros((0, self.weights_num))
 
         for p in range(0, population.shape[0], 2):
-            parent_1 = self.tournament(population, population_fitness)
-            parent_2 = self.tournament(population, population_fitness)
+            if self.tournament_method == selRandom:
+                parent_1, parent_2 = self.tournament_method(population, **self.tournament_kwargs)
+            else:
+                parent_1, parent_2 = self.tournament_method(population, population_fitness, **self.tournament_kwargs)
 
             children = []
             for _ in range(self.mating_num):
