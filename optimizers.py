@@ -265,5 +265,4 @@ class EvolutionaryAlgorithm:
             fitness_list.append(fitness)
 
         np.savetxt(os.path.join(self.experiment_name, 'test_results.txt'), fitness_list)
-
-        sys.exit(0)
+        return fitness_list

@@ -26,7 +26,8 @@ DOOMSDAY_REPLACE_WITH_RANDOM_PROB = 0.85
 DEAP_CROSSOVER_METHOD = cxUniform
 TOURNAMENT_METHOD = selTournament
 
-experiment_name = f"experiments/enemy{ENEMY_NUMBER}_tournament{TOURNAMENT_METHOD.__name__}_mating{MATING_NUM}_pop{POPULATION_SIZE}_patience{PATIENCE}_DPR{DOOMSDAY_POPULATION_RATIO}_DRWRP{DOOMSDAY_REPLACE_WITH_RANDOM_PROB}_mutGaus_mu0sigma1prob03_{DEAP_CROSSOVER_METHOD.__name__}_{LAUNCH_NUM}"
+# experiment_name = f"experiments/enemy{ENEMY_NUMBER}_tournament{TOURNAMENT_METHOD.__name__}_mating{MATING_NUM}_pop{POPULATION_SIZE}_patience{PATIENCE}_DPR{DOOMSDAY_POPULATION_RATIO}_DRWRP{DOOMSDAY_REPLACE_WITH_RANDOM_PROB}_mutGaus_mu0sigma1prob03_{DEAP_CROSSOVER_METHOD.__name__}_{LAUNCH_NUM}"
+experiment_name ='delete'
 if not os.path.exists(experiment_name):
     os.makedirs(experiment_name)
 
@@ -35,14 +36,14 @@ player_controller = PlayerController(hidden_layer_sizes)
 
 # initializes simulation in individual evolution mode, for single static enemy.
 env = Environment(experiment_name=experiment_name,
-                  enemies=[ENEMY_NUMBER],  # array with 1 to 8 items, values from 1 to 8
+                  enemies=[2,3,5],  # array with 1 to 8 items, values from 1 to 8
                   playermode="ai",
                   player_controller=player_controller,
                   enemymode="static",
                   level=2,
                   speed="fastest",
                   visualmode="no",
-                  multiplemode='no',
+                  multiplemode='yes',
                   randomini='yes')
 
 ea = EvolutionaryAlgorithm(env=env,
@@ -61,6 +62,6 @@ ea = EvolutionaryAlgorithm(env=env,
                            deap_mutation_kwargs={"mu": 0, "sigma": 1, "indpb": 0.3},
                            deap_crossover_method=DEAP_CROSSOVER_METHOD,
                            deap_crossover_kwargs={"indpb": 0.6})
-ea.train(generations=20)
+ea.train(generations=1)
 
 ea.test(n_times=5)
