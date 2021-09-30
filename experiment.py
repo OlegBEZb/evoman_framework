@@ -42,6 +42,7 @@ env = Environment(experiment_name=experiment_name,
                   level=2,
                   speed="fastest",
                   visualmode="no",
+                  multiplemode='no',
                   randomini='yes')
 
 ea = EvolutionaryAlgorithm(env=env,
