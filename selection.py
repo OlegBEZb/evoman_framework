@@ -1,5 +1,7 @@
 import numpy as np
 from operator import itemgetter
+from sklearn.preprocessing import MinMaxScaler
+from utils import norm
 
 
 def selRandom(population, k):
@@ -28,6 +30,7 @@ def selBest(population, population_fitness, k):
 
 
 def selTournament(population, population_fitness, k, tournsize):
+    # ATTENTION: this func is slow
     """Select the best individual among *tournsize* randomly chosen
     individuals, *k* times. The list returned contains
     references to the input *individuals*.
@@ -40,7 +43,14 @@ def selTournament(population, population_fitness, k, tournsize):
     """
     chosen = []
     for i in range(k):
-        indices = np.random.choice(range(len(population_fitness)), size=tournsize, replace=True)
+        indices = np.random.choice(range(len(population_fitness)), size=tournsize, replace=False)
         max_index = np.argmax(itemgetter(*indices)(population_fitness))
         chosen.append(population[indices[max_index]])
     return chosen
+
+
+def selProportional(population, population_fitness, k):
+    population_fitness = np.array(list(map(lambda y: norm(y, population_fitness), population_fitness)))
+    probs = population_fitness / population_fitness.sum()
+    rows = np.random.choice(population.shape[0], size=k, p=probs.ravel(), replace=False)
+    return population[rows]
