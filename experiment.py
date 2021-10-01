@@ -20,7 +20,7 @@ if __name__ == "__main__":
         ENEMY_NUMBER = 1
 
 MATING_NUM = 3
-POPULATION_SIZE = 50
+POPULATION_SIZE = 100
 PATIENCE = 17
 
 DOOMSDAY_POPULATION_RATIO = 0.3
@@ -32,8 +32,9 @@ DEAP_CROSSOVER_KWARGS = {"indpb": 0.6}
 DEAP_MUTATION_OPERATOR = mutGaussian
 DEAP_MUTATION_KWARGS = {"mu": 0, "sigma": 1, "indpb": 0.8}
 
-TOURNAMENT_METHOD = selProportional()
-TOURNAMENT_KWARGS = {}
+TOURNAMENT_METHOD = selProportional
+TOURNAMENT_KWARGS = {'k': 2
+                     }
 
 experiment_name = f"""experiments/enemy{ENEMY_NUMBER}_tournament{TOURNAMENT_METHOD.__name__}{dict2str(TOURNAMENT_KWARGS).replace('"', '')}_mating{MATING_NUM}_pop{POPULATION_SIZE}_patience{PATIENCE}_DPR{DOOMSDAY_POPULATION_RATIO}_DRWRP{DOOMSDAY_REPLACE_WITH_RANDOM_PROB}_mutGaus_mu0sigma1prob{DEAP_MUTATION_KWARGS['indpb']}_{DEAP_CROSSOVER_METHOD.__name__}{DEAP_CROSSOVER_KWARGS['indpb']}_LAUNCH_{LAUNCH_NUM}"""
 
