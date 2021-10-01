@@ -156,8 +156,8 @@ best_hyperparameters = fmin(
     fn=train,
     space=search_space,
     algo=algo,
-    max_evals=50,
-    timeout=25200)
+    max_evals=5,
+    timeout=3600)
 
 # We can distribute tuning across our Spark cluster
 # by calling `fmin` with a `SparkTrials` instance.

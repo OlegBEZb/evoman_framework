@@ -1,3 +1,5 @@
+import json
+
 def norm(x, pfit_pop):
     if (max(pfit_pop) - min(pfit_pop)) > 0:
         x_norm = (x - min(pfit_pop)) / (max(pfit_pop) - min(pfit_pop))
@@ -7,3 +9,8 @@ def norm(x, pfit_pop):
     if x_norm <= 0:
         x_norm = 0.0000000001
     return x_norm
+
+def dict2str(d):
+    dump = json.dumps(d)
+    dump = dump.replace('"', '').replace(': ', '_')
+    return dump
