@@ -11,7 +11,7 @@ os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
 # from evoman.environment import Environment
 sys.path.insert(0, 'evoman')
 from environment import Environment
-from demo_controller import PlayerController
+from controllers import PlayerController
 from optimizers import EvolutionaryAlgorithm
 import numpy as np
 

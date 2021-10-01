@@ -5,10 +5,11 @@ from utils import dict2str
 # from evoman.environment import Environment
 sys.path.insert(0, 'evoman')
 from environment import Environment
-from demo_controller import PlayerController
+from controllers import PlayerController
 from optimizers import EvolutionaryAlgorithm
 from deap.tools.mutation import mutGaussian
 from deap.tools.crossover import *
+from custom_crossover import crossover_4_default
 from selection import selBest, selRandom, selTournament, selProportional
 
 if __name__ == "__main__":
@@ -20,7 +21,7 @@ if __name__ == "__main__":
         ENEMY_NUMBER = 1
 
 MATING_NUM = 3
-POPULATION_SIZE = 100
+POPULATION_SIZE = 50
 PATIENCE = 17
 
 DOOMSDAY_POPULATION_RATIO = 0.3
@@ -33,8 +34,7 @@ DEAP_MUTATION_OPERATOR = mutGaussian
 DEAP_MUTATION_KWARGS = {"mu": 0, "sigma": 1, "indpb": 0.8}
 
 TOURNAMENT_METHOD = selProportional
-TOURNAMENT_KWARGS = {'k': 2
-                     }
+TOURNAMENT_KWARGS = {'k': 2}
 
 experiment_name = f"""experiments/enemy{ENEMY_NUMBER}_tournament{TOURNAMENT_METHOD.__name__}{dict2str(TOURNAMENT_KWARGS).replace('"', '')}_mating{MATING_NUM}_pop{POPULATION_SIZE}_patience{PATIENCE}_DPR{DOOMSDAY_POPULATION_RATIO}_DRWRP{DOOMSDAY_REPLACE_WITH_RANDOM_PROB}_mutGaus_mu0sigma1prob{DEAP_MUTATION_KWARGS['indpb']}_{DEAP_CROSSOVER_METHOD.__name__}{DEAP_CROSSOVER_KWARGS['indpb']}_LAUNCH_{LAUNCH_NUM}"""
 
@@ -53,7 +53,7 @@ env = Environment(experiment_name=experiment_name,
                   enemymode="static",
                   level=2,
                   speed="fastest",
-                  visualmode="no",
+                  # visualmode="no",  # requires environment adjustment
                   multiplemode='no',
                   randomini='yes')
 

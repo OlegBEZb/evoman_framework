@@ -5,6 +5,7 @@ from evoman.environment import Environment
 from selection import selRandom
 from deap.tools.mutation import mutGaussian
 from deap.tools.crossover import cxOnePoint
+from custom_crossover import crossover_4_default
 import random
 import csv
 
@@ -128,12 +129,21 @@ class EvolutionaryAlgorithm:
         for p in range(0, population.shape[0], 2):
             if self.tournament_method == selRandom:
                 parent_1, parent_2 = self.tournament_method(population, **self.tournament_kwargs)
+            elif self.tournament_method == crossover_4_default:
+                parent_1 = self.tournament(population, population_fitness)
+                parent_2 = self.tournament(population, population_fitness)
+                parent_3 = self.tournament(population, population_fitness)
+                parent_4 = self.tournament(population, population_fitness)
             else:
                 parent_1, parent_2 = self.tournament_method(population, population_fitness, **self.tournament_kwargs)
 
             children = []
             for _ in range(self.mating_num):
-                children.extend(self.deap_crossover_method(parent_1, parent_2, **self.deap_crossover_kwargs))
+                if self.tournament_method == crossover_4_default:
+                    children.extend(self.deap_crossover_method_4(parent_1, parent_2, parent_3,
+                                                                 parent_4 ** self.deap_crossover_kwargs_4))
+                else:
+                    children.extend(self.deap_crossover_method(parent_1, parent_2, **self.deap_crossover_kwargs))
 
             offspring = random.sample(children, random.randint(1, len(children)))
             offspring = self.mutation(offspring)
