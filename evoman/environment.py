@@ -165,7 +165,8 @@ class Environment(object):
 
     def print_logs(self, msg):
         if self.logs == "on":
-            print('\n' + msg)  # prints log messages to screen
+            # print('\n' + msg)  # prints log messages to screen
+            print(msg)  # prints log messages to screen
 
             if self.savelogs == "yes":  # prints log messages to file
                 file_aux = open(self.experiment_name + '/evoman_logs.txt', 'a')

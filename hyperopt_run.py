@@ -48,6 +48,8 @@ def train(params):
 
     deap_crossover_method = params['deap_crossover_method']
     deap_crossover_kwargs = params.get('deap_crossover_kwargs', {})
+    if not isinstance(deap_crossover_kwargs, dict):
+        deap_crossover_kwargs = {"indpb": deap_crossover_kwargs}
 
     deap_mutation_operator = params['deap_mutation_operator']
     deap_mutation_kwargs = params.get('deap_mutation_kwargs', {})
@@ -127,7 +129,9 @@ search_space = {
             "patience": ho_scope.int(hp.quniform("patience", 1, 20, q=1)),
             "doomsday_population_ratio": hp.uniform("doomsday_population_ratio", 0, 1),
             "doomsday_replace_with_random_prob": hp.uniform("doomsday_replace_with_random_prob", 0, 1),
+
             "deap_crossover_method": hp.choice("deap_crossover_method", [cxUniform]),
+            "deap_crossover_kwargs": hp.uniform("deap_crossover_kwargs", 0, 1),
 
             "deap_mutation_operator": hp.choice("deap_mutation_operator", [mutGaussian]),
             "deap_mutation_kwargs": hp.choice("deap_mutation_kwargs", [{"mu": 0, "sigma": 1, "indpb": 0.3},
@@ -136,7 +140,7 @@ search_space = {
                                                                        {"mu": 0, "sigma": 1, "indpb": 0.8}]),
 
             "tournament_method": hp.choice("tournament_method", [selProportional]),
-            "tournament_kwargs": hp.choice("tournament_kwargs1", [{"k": 2}]),  # may be hardcoded?
+            "tournament_kwargs": hp.choice("tournament_kwargs", [{"k": 2}]),  # may be hardcoded?
         }
     ])}
 
@@ -152,7 +156,7 @@ best_hyperparameters = fmin(
     fn=train,
     space=search_space,
     algo=algo,
-    max_evals=2,
+    max_evals=50,
     timeout=25200)
 
 # We can distribute tuning across our Spark cluster

@@ -1,0 +1,33 @@
+
+
+MESSAGE: Pygame initialized for simulation.
+
+RUN: run status: enemy: 2; fitness: 91.65873645484157; player life: 72; enemy life: 0; time: 255
+
+RUN: run status: enemy: 3; fitness: 39.168117522716486; player life: 0; enemy life: 50.0; time: 341
+
+RUN: run status: enemy: 5; fitness: 89.8452886203982; player life: 54.40000000000032; enemy life: 0; time: 269
+
+RUN: run status: enemy: 2; fitness: 91.76878821817864; player life: 74; enemy life: 0; time: 279
+
+RUN: run status: enemy: 3; fitness: 66.17399989261955; player life: 0; enemy life: 20.0; time: 339
+
+RUN: run status: enemy: 5; fitness: 88.94518926293742; player life: 47.8000000000003; enemy life: 0; time: 342
+
+RUN: run status: enemy: 2; fitness: 91.76878821817864; player life: 74; enemy life: 0; time: 279
+
+RUN: run status: enemy: 3; fitness: 39.168117522716486; player life: 0; enemy life: 50.0; time: 341
+
+RUN: run status: enemy: 5; fitness: 90.0252886203982; player life: 56.20000000000032; enemy life: 0; time: 269
+
+RUN: run status: enemy: 2; fitness: 91.65873645484157; player life: 72; enemy life: 0; time: 255
+
+RUN: run status: enemy: 3; fitness: 39.168117522716486; player life: 0; enemy life: 50.0; time: 341
+
+RUN: run status: enemy: 5; fitness: 89.00518926293742; player life: 48.400000000000304; enemy life: 0; time: 342
+
+RUN: run status: enemy: 2; fitness: 91.65873645484157; player life: 72; enemy life: 0; time: 255
+
+RUN: run status: enemy: 3; fitness: 39.168117522716486; player life: 0; enemy life: 50.0; time: 341
+
+RUN: run status: enemy: 5; fitness: 89.06518926293742; player life: 49.000000000000306; enemy life: 0; time: 342
