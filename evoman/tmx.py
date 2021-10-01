@@ -78,7 +78,7 @@ class Tileset(object):
 
         tileset = cls(name, tile_width, tile_height, firstgid)
 
-        for c in tag:
+        for c in tag.getchildren():
             if c.tag == "image":
                 # create a tileset
                 tileset.add_image(c.attrib['source'])
