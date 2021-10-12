@@ -53,7 +53,7 @@ env = Environment(experiment_name=experiment_name,
                   enemymode="static",
                   level=2,
                   speed="fastest",
-                  # visualmode="no",  # requires environment adjustment
+                  visualmode="no",  # requires environment adjustment
                   multiplemode='no',
                   randomini='yes')
 

@@ -88,8 +88,8 @@ def create_lineplot(ea1data, ea2data):
 
     errorbandEA1_mean = errorbands(generation1, meanEA1[0], meanEA1[1])
     errorbandEA1_max = errorbands(generation1, maxEA1[0], maxEA1[1])
-    errorbandEA2_mean = errorbands(generation2, meanEA2[0], meanEA2[1], fillcolor='rgba(217,95,2,0.2)')
-    errorbandEA2_max = errorbands(generation2, maxEA2[0], maxEA2[1], fillcolor='rgba(217,95,2,0.2)')
+    errorbandEA2_mean = errorbands(generation2, meanEA2[0], meanEA2[1], fillcolor='rgba(125,38,205,0.2)')
+    errorbandEA2_max = errorbands(generation2, maxEA2[0], maxEA2[1], fillcolor='rgba(125,38,205,0.2)')
 
     fig = go.Figure([
         lineplot(generation1, meanEA1[0], 'mean fitness EA1'),
@@ -98,24 +98,22 @@ def create_lineplot(ea1data, ea2data):
         lineplot(generation1, maxEA1[0], 'max fitness EA1', dash='longdash'),
         errorbandEA1_max[0],
         errorbandEA1_max[1],
-        lineplot(generation2, meanEA2[0], 'mean fitness EA2', color='rgb(217,95,2)'),
+        lineplot(generation2, meanEA2[0], 'mean fitness EA2', color='rgb(125,38,205)'),
         errorbandEA2_mean[0],
         errorbandEA2_mean[1],
-        lineplot(generation2, maxEA2[0], 'max fitness EA2', color='rgb(217,95,2)', dash='longdash'),
+        lineplot(generation2, maxEA2[0], 'max fitness EA2', color='rgb(125,38,205)', dash='longdash'),
         errorbandEA2_max[0],
         errorbandEA2_max[1]])
 
     fig.update_layout(
         font_family = 'Serif',
         font_color = 'black',
-        font_size=20,
         xaxis_title='Generation',
         yaxis_title='Fitness',
         title='<b>Enemy '+enemynumber+'</b>',
         title_x=0.5,
-        title_font_size=25,
+        title_font_size=20,
         legend=dict(
-            font_size=20,
             bgcolor = 'rgba(255,255,255,0.4)',
             yanchor="bottom",
             y=0.01,
@@ -127,12 +125,12 @@ def create_lineplot(ea1data, ea2data):
 def create_boxplot(gainmeansEA1: list, gainmeansEA2: list):
     fig = go.Figure()
     fig.add_trace(go.Box(y=gainmeansEA1, name='EA1', line=dict(color='rgb(0,100,80)'), showlegend=False))
-    fig.add_trace(go.Box(y=gainmeansEA2, name='EA2', line=dict(color='rgb(217,95,2)'), showlegend=False))
+    fig.add_trace(go.Box(y=gainmeansEA2, name='EA2', line=dict(color='rgb(125,38,205)'), showlegend=False))
     fig.update_layout(
         font_family='Serif',
         font_color='black',
         xaxis_title='Evolutionary Algorithm',
-        yaxis_title='Fitness mean',
+        yaxis_title='Individual Gain',
         title='<b>Enemy ' + enemynumber + '</b>',
         title_x=0.5,
         title_font_size=20,
@@ -153,13 +151,12 @@ def get_data(dataframe_list:list):
 
 
 #GET RESULTS
-enemyList = ['2','3','5']#,'5','6','7','8']
+enemyList = ['1','2','3']#,'4','5','6','7','8']
 directory = os.path.dirname(os.path.realpath(__file__)) + '/experiments'
-EA1 = 'tournamentselProportional{k_2}_mating3_pop100_patience17_DPR0.3_DRWRP0.75_mutGaus_mu0sigma1prob0.8_cxUniform0.6'
-EA2 = 'mating4_pop100_patience3_DPR0.4_DRWRP0.85_mutGaus_mu0sigma1prob03_cxUniform_4parents_expfitness'
+EA1 = 'mating4_pop100_patience3_DPR0.4_DRWRP0.85_mutGaus_mu0sigma1prob03_cxUniform'
+EA2 = 'mating2_pop100_patience3_DPR0.4_DRWRP0.6_mutGaus_05_cxBlend'
 
 for enemynumber in enemyList:
-    print("Enemy"+enemynumber)
     experiment_names = ['enemy'+enemynumber+'_'+EA1,'enemy'+enemynumber+'_'+EA2]
 
     fitness_meanDf1, fitness_maxDf1, individualgain_mean1 = get_stats(directory, experiment_names[0])
@@ -173,12 +170,4 @@ for enemynumber in enemyList:
 
     pio.write_image(create_lineplot(EA1data, EA2data), "plots/fitnessEnemy"+enemynumber+".png", format="png", scale=1.5)
 
-    pio.write_image(create_boxplot(individualgain_mean1,individualgain_mean2),"plots/boxplotEnemy"+enemynumber+".png", format="png", scale=1.5)
-
-    EAlist = ["EA1"]*10+["EA2"]*10
-    boxplotData = []
-    for ea,value in zip(EAlist,individualgain_mean1+individualgain_mean2):
-        boxplotData.append([ea,value])
-
-    boxplotDf = pd.DataFrame(boxplotData, columns = ["EA","fitness"])
-    boxplotDf.to_csv('plots/boxplotEnemy'+str(enemynumber)+'.csv')
+    pio.write_image(create_boxplot(individualgain_mean1,individualgain_mean2),"plots/gainEnemy"+enemynumber+".png", format="png", scale=1.5)

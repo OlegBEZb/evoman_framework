@@ -152,22 +152,22 @@ algo = tpe.suggest  # Tree of Parzen Estimators, a Bayesian method
 
 # # We can run Hyperopt locally (only on the driver machine)
 # # by calling `fmin` without an explicit `trials` argument.
-best_hyperparameters = fmin(
-    fn=train,
-    space=search_space,
-    algo=algo,
-    max_evals=5,
-    timeout=3600)
+# best_hyperparameters = fmin(
+#     fn=train,
+#     space=search_space,
+#     algo=algo,
+#     max_evals=5,
+#     timeout=3600)
 
 # We can distribute tuning across our Spark cluster
 # by calling `fmin` with a `SparkTrials` instance.
-# spark_trials = SparkTrials()
-# best_hyperparameters = fmin(
-#   fn=train,
-#   space=search_space,
-#   algo=algo,
-#   trials=spark_trials,
-#   max_evals=32)
+spark_trials = SparkTrials()
+best_hyperparameters = fmin(
+  fn=train,
+  space=search_space,
+  algo=algo,
+  trials=spark_trials,
+  max_evals=32)
 
 # for _ in range(32):
 #     best_hyperparameters = fmin(
