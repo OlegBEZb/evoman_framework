@@ -3,14 +3,27 @@ from hyperopt import SparkTrials, STATUS_OK
 from hyperopt.pyll import scope as ho_scope
 from hyperopt.pyll.stochastic import sample as ho_sample
 from hyperopt import plotting
-import sys, os, pickle
+import sys, os
 
-os.environ['JAVA_HOME'] = "C:\Program Files\Java\jdk-11.0.11"
-os.environ['PYSPARK_PYTHON'] = sys.executable
-os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
-# from evoman.environment import Environment
+USE_SPARK = True
+
+# # os.environ['EVOMAN_PATH'] = '/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman'
+# import pyspark
+# conf = pyspark.conf.SparkConf()#.setExecutorEnv('EVOMAN_PATH', os.environ.get('EVOMAN_PATH'))
+# conf.set("spark.driver.memory", "4g")
+# conf.set("spark.executor.memory", "4g")
+# spark = pyspark.sql.SparkSession.builder.config(conf=conf).getOrCreate()
+# spark = pyspark.sql.SparkSession.builder.getOrCreate()
+#
+
 sys.path.insert(0, 'evoman')
+# print(os.environ.get('EVOMAN_PATH'))
+# sys.path.insert(0, os.environ.get('EVOMAN_PATH'))
+# print(sys.path)
+
 from environment import Environment
+# from evoman.environment import Environment
+
 from controllers import PlayerController
 from optimizers import EvolutionaryAlgorithm
 import numpy as np
@@ -150,32 +163,34 @@ search_space = {
 # Select a search algorithm for Hyperopt to use.
 algo = tpe.suggest  # Tree of Parzen Estimators, a Bayesian method
 
-# # We can run Hyperopt locally (only on the driver machine)
-# # by calling `fmin` without an explicit `trials` argument.
-# best_hyperparameters = fmin(
-#     fn=train,
-#     space=search_space,
-#     algo=algo,
-#     max_evals=5,
-#     timeout=3600)
+if not USE_SPARK:
+    # # We can run Hyperopt locally (only on the driver machine)
+    # # by calling `fmin` without an explicit `trials` argument.
+    best_hyperparameters = fmin(
+        fn=train,
+        space=search_space,
+        algo=algo,
+        max_evals=5,
+        timeout=3600)
 
-# We can distribute tuning across our Spark cluster
-# by calling `fmin` with a `SparkTrials` instance.
-spark_trials = SparkTrials()
-best_hyperparameters = fmin(
-  fn=train,
-  space=search_space,
-  algo=algo,
-  trials=spark_trials,
-  max_evals=32)
+else:
+    # We can distribute tuning across our Spark cluster
+    # by calling `fmin` with a `SparkTrials` instance.
+    spark_trials = SparkTrials()
+    best_hyperparameters = fmin(
+      fn=train,
+      space=search_space,
+      algo=algo,
+      trials=spark_trials,
+      max_evals=32)
 
-# for _ in range(32):
-#     best_hyperparameters = fmin(
-#         fn=train,
-#         space=search_space,
-#         algo=algo,
-#         trials=spark_trials,
-#         max_evals=len(spark_trials)+1)
-#     plotting.main_plot_history(spark_trials)
+    for _ in range(32):
+        best_hyperparameters = fmin(
+            fn=train,
+            space=search_space,
+            algo=algo,
+            trials=spark_trials,
+            max_evals=len(spark_trials)+1)
+        plotting.main_plot_history(spark_trials)
 
 print('best_hyperparameters', best_hyperparameters)
