@@ -5,7 +5,8 @@
 ################################
 
 import sys
-sys.path.insert(0, 'evoman')
+# sys.path.insert(0, '/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman')
+sys.path.insert(0, '/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman')
 import Base
 from Base.SpriteConstants import *
 from Base.SpriteDefinition import *
@@ -14,7 +15,7 @@ from sensors import *
 
 # player proctile
 class Bullet_p(pygame.sprite.Sprite):
-    image = pygame.image.load('evoman/images/bullet_r.png')
+    image = pygame.image.load('/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/images/bullet_r.png')
 
     def __init__(self, location, direction, n_twist, *groups):
         super(Bullet_p, self).__init__(*groups)
@@ -25,9 +26,9 @@ class Bullet_p(pygame.sprite.Sprite):
 
         # fits image according to the side the player is turned to
         if self.direction == 1:
-            self.image = pygame.image.load('evoman/images/bullet_r.png')
+            self.image = pygame.image.load('/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/images/bullet_r.png')
         else:
-            self.image = pygame.image.load('evoman/images/bullet_l.png')
+            self.image = pygame.image.load('/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/images/bullet_l.png')
 
     def update(self, dt, game):
 
@@ -64,7 +65,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, location, enemyn, level, *groups):
         super(Player, self).__init__(*groups)
 
-        self.spriteDefinition = SpriteDefinition('evoman/images/EvoManSprites.png', 0, 0, 43, 59)
+        self.spriteDefinition = SpriteDefinition('/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/images/EvoManSprites.png', 0, 0, 43, 59)
         self.updateSprite(SpriteConstants.STANDING, SpriteConstants.RIGHT)
 
         self.rect = pygame.rect.Rect(location, self.image.get_size())
@@ -278,7 +279,7 @@ class Player(pygame.sprite.Sprite):
 
                 # sound effects
                 if game.sound == "on" and game.playermode == "human":
-                    sound = pygame.mixer.Sound('evoman/sounds/scifi003.wav')
+                    sound = pygame.mixer.Sound('/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/sounds/scifi003.wav')
                     c = pygame.mixer.Channel(2)
                     c.set_volume(1)
                     c.play(sound)

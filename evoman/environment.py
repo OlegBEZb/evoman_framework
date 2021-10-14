@@ -11,10 +11,10 @@ import numpy
 import pygame
 from pygame.locals import *
 import struct
-import tmx
+from evoman.tmx import load, SpriteLayer
 import os
 
-from player import *
+from evoman.player import *
 from controller import Controller
 
 
@@ -128,15 +128,15 @@ class Environment(object):
 
         # loads enemy and map
         enemy = __import__('enemy' + str(self.enemyn))
-        self.tilemap = tmx.load(enemy.tilemap, self.screen.get_size())  # map
+        self.tilemap = load(enemy.tilemap, self.screen.get_size())  # map
 
-        self.sprite_e = tmx.SpriteLayer()
+        self.sprite_e = SpriteLayer()
         start_cell = self.tilemap.layers['triggers'].find('enemy')[0]
         self.enemy = enemy.Enemy((start_cell.px, start_cell.py), self.sprite_e)
         self.tilemap.layers.append(self.sprite_e)  # enemy
 
         # loads player
-        self.sprite_p = tmx.SpriteLayer()
+        self.sprite_p = SpriteLayer()
         start_cell = self.tilemap.layers['triggers'].find('player')[0]
         self.player = Player((start_cell.px, start_cell.py), self.enemyn, self.level, self.sprite_p)
         self.tilemap.layers.append(self.sprite_p)
@@ -369,8 +369,8 @@ class Environment(object):
             # default fitness function for single solutions
 
     def fitness_single(self):
-        # return 0.9 * (100 - self.get_enemylife()) + 0.1 * self.get_playerlife() - numpy.log(self.get_time())
-        return self.get_playerlife() - self.get_enemylife()
+        return 0.9 * (100 - self.get_enemylife()) + 0.1 * self.get_playerlife() - numpy.log(self.get_time())
+        # return self.get_playerlife() - self.get_enemylife()
 
     # default fitness function for consolidating solutions among multiple games
     def cons_multi(self, values):
@@ -432,7 +432,7 @@ class Environment(object):
             if self.playermode == "human" or self.sound == "on":
                 # sound effects
                 if self.sound == "on" and self.time == 1:
-                    sound = pygame.mixer.Sound('evoman/sounds/open.wav')
+                    sound = pygame.mixer.Sound('/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/sounds/open.wav')
                     c = pygame.mixer.Channel(1)
                     c.set_volume(1)
                     c.play(sound, loops=10)

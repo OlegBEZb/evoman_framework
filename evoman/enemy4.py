@@ -13,7 +13,7 @@ from Base.SpriteConstants import *
 from Base.SpriteDefinition import *
 from sensors import Sensors
 
-tilemap = 'evoman/map2.tmx'
+tilemap = '/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/map2.tmx'
 timeexpire = 1500 # game run limit
 
 # enemy 4 sprite, heatman
@@ -23,7 +23,7 @@ class Enemy(pygame.sprite.Sprite):
 
     def __init__(self, location,*groups):
         super(Enemy, self).__init__(*groups)
-        self.spriteDefinition = SpriteDefinition('evoman/images/EnemySprites.png', 0, 0, 43, 59)
+        self.spriteDefinition = SpriteDefinition('/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/images/EnemySprites.png', 0, 0, 43, 59)
         self.updateSprite(SpriteConstants.STANDING, SpriteConstants.LEFT)
 
         self.rect = pygame.rect.Rect(location, self.image.get_size())
@@ -207,7 +207,7 @@ class Enemy(pygame.sprite.Sprite):
 
                     # bullets sound effect
                     if game.sound == "on" and game.playermode == "human":
-                        sound = pygame.mixer.Sound('evoman/sounds/scifi011.wav')
+                        sound = pygame.mixer.Sound('/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/sounds/scifi011.wav')
                         c = pygame.mixer.Channel(3)
                         c.set_volume(10)
                         c.play(sound)
@@ -234,9 +234,9 @@ class Enemy(pygame.sprite.Sprite):
             #  changes the image when enemy is hurt and imune, as a fireball
             if self.imune == 1:
                 if game.time%2==0:
-                    self.image = pygame.image.load('evoman/images/fireball.png')
+                    self.image = pygame.image.load('/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/images/fireball.png')
                 else:
-                    self.image = pygame.image.load('evoman/images/fireball2.png')
+                    self.image = pygame.image.load('/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/images/fireball2.png')
 
             self.hurt -=1
 
@@ -247,7 +247,7 @@ class Enemy(pygame.sprite.Sprite):
 # enemy bullets
 class Bullet_e4(pygame.sprite.Sprite):
 
-    image = pygame.image.load('evoman/images/bullet_l.png')
+    image = pygame.image.load('/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/images/bullet_l.png')
 
     def __init__(self, location, direction, n, n_twist, *groups):
         super(Bullet_e4, self).__init__(*groups)

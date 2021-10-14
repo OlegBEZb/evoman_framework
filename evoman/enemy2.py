@@ -13,7 +13,8 @@ from Base.SpriteConstants import *
 from Base.SpriteDefinition import *
 from sensors import Sensors
 
-tilemap = 'evoman/map2.tmx'
+import os
+tilemap = os.path.join('/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman', 'map2.tmx')
 timeexpire = 1000 # game run limit
 
 # enemy 2 sprite, airman
@@ -24,7 +25,7 @@ class Enemy(pygame.sprite.Sprite):
 
         super(Enemy, self).__init__(*groups)
 
-        self.spriteDefinition = SpriteDefinition('evoman/images/EnemySprites.png', 0, 0, 43, 59)
+        self.spriteDefinition = SpriteDefinition(os.path.join('/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman', 'images/EnemySprites.png'), 0, 0, 43, 59)
         self.updateSprite(SpriteConstants.STANDING, SpriteConstants.LEFT)
 
         self.rect = pygame.rect.Rect(location, self.image.get_size())
@@ -201,7 +202,7 @@ class Enemy(pygame.sprite.Sprite):
 
                  # bullets sound effect
                 if game.sound == "on" and game.playermode == "human":
-                    sound = pygame.mixer.Sound('evoman/sounds/scifi011.wav')
+                    sound = pygame.mixer.Sound(os.path.join('/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman', '/sounds/scifi011.wav'))
                     c = pygame.mixer.Channel(3)
                     c.set_volume(10)
                     c.play(sound)
@@ -241,8 +242,7 @@ class Enemy(pygame.sprite.Sprite):
 # enemy's bullet
 class Bullet_e2(pygame.sprite.Sprite):
 
-
-    image = pygame.image.load('evoman/images/torna.png')
+    image = pygame.image.load(os.path.join('/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman', 'images/torna.png'))
 
     def __init__(self, location, direction,n, n_twist , *groups):
         super(Bullet_e2, self).__init__(*groups)
@@ -257,9 +257,9 @@ class Bullet_e2(pygame.sprite.Sprite):
     def update(self, dt, game):
 
         if game.time%2==0:
-            self.image = pygame.image.load('evoman/images/torna.png')
+            self.image = pygame.image.load(os.path.join('/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman', 'images/torna.png'))
         else:
-            self.image = pygame.image.load('evoman/images/torna2.png')
+            self.image = pygame.image.load(os.path.join('/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman', 'images/torna2.png'))
 
 
         # removes bullets objetcs when they transpass the screen limits

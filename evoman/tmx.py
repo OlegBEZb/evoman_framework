@@ -88,6 +88,7 @@ class Tileset(object):
         return tileset
 
     def add_image(self, file):
+        file = file.replace('evoman', sys.path[0])
         image = pygame.image.load(file).convert_alpha()
         if not image:
             sys.exit("Error creating new Tileset: file %s not found" % file)

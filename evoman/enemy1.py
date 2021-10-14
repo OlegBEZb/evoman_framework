@@ -13,7 +13,7 @@ from Base.SpriteConstants import *
 from Base.SpriteDefinition import *
 from sensors import Sensors
 
-tilemap = 'evoman/map1.tmx'  # scenario
+tilemap = '/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/map1.tmx'  # scenario
 timeexpire = 1000 # game run limit
 
 
@@ -25,7 +25,7 @@ class Enemy(pygame.sprite.Sprite):
 
         super(Enemy, self).__init__(*groups)
 
-        self.spriteDefinition = SpriteDefinition('evoman/images/EnemySprites.png', 0, 0, 43, 59)
+        self.spriteDefinition = SpriteDefinition('/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/images/EnemySprites.png', 0, 0, 43, 59)
         self.updateSprite(SpriteConstants.STANDING, SpriteConstants.LEFT)
 
         self.rect = pygame.rect.Rect(location, self.image.get_size())
@@ -230,7 +230,7 @@ class Enemy(pygame.sprite.Sprite):
             # Bullets sound effect.
             if game.sound == "on" and game.playermode == "human":
 
-                sound = pygame.mixer.Sound('evoman/sounds/scifi011.wav')
+                sound = pygame.mixer.Sound('/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/sounds/scifi011.wav')
                 c = pygame.mixer.Channel(3)
                 c.set_volume(10)
                 c.play(sound)
@@ -282,7 +282,7 @@ class Bullet_e1(pygame.sprite.Sprite):
 
 
 
-    image = pygame.image.load('evoman/images/bullet2_l.png')
+    image = pygame.image.load('/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/images/bullet2_l.png')
 
     def __init__(self, location, direction, n_twist, *groups):
         super(Bullet_e1, self).__init__(*groups)
@@ -292,9 +292,9 @@ class Bullet_e1(pygame.sprite.Sprite):
 
         # Fits image according to the side the enemy is turned to.
         if self.direction == 1:
-            self.image = pygame.image.load('evoman/images/bullet2_r.png')
+            self.image = pygame.image.load('/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/images/bullet2_r.png')
         else:
-            self.image = pygame.image.load('evoman/images/bullet2_l.png')
+            self.image = pygame.image.load('/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/images/bullet2_l.png')
 
 
 
