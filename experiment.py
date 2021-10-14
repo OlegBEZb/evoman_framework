@@ -3,7 +3,7 @@ import os
 from utils import dict2str
 
 # from evoman.environment import Environment
-sys.path.insert(0, 'evoman')
+sys.path.insert(0, '/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman')
 from environment import Environment
 from controllers import PlayerController
 from optimizers import EvolutionaryAlgorithm

@@ -162,7 +162,7 @@ if not USE_SPARK:
     from ray.tune.suggest.hyperopt import HyperOptSearch
     hyperopt_search = HyperOptSearch(search_space, metric="mean_accuracy", mode="max")
 
-    analysis = tune.run(train, num_samples=10,
+    analysis = tune.run(train, num_samples=24,
                         search_alg=hyperopt_search,
                         time_budget_s=7200,
                         verbose=3,
@@ -170,7 +170,7 @@ if not USE_SPARK:
                         )
     df = analysis.results_df
     print(type(df), df)
-    df.to_csv('hyperopt_results.csv')
+    df.to_csv('hyperopt_results.csv2')
 
     # To enable GPUs, use this instead:
     # analysis = tune.run(
