@@ -1,21 +1,8 @@
 from hyperopt import fmin, hp, tpe
-from hyperopt import SparkTrials, STATUS_OK
 from hyperopt.pyll import scope as ho_scope
 from hyperopt.pyll.stochastic import sample as ho_sample
 from hyperopt import plotting
 import sys, os
-
-USE_SPARK = False
-
-# import pyspark
-# conf = pyspark.conf.SparkConf()#.setExecutorEnv('EVOMAN_PATH', os.environ.get('EVOMAN_PATH'))
-# conf.set("spark.driver.memory", "4g")
-# conf.set("spark.executor.memory", "4g")
-# spark = pyspark.sql.SparkSession.builder.config(conf=conf).getOrCreate()
-# spark = pyspark.sql.SparkSession.builder.getOrCreate()
-#
-
-# os.environ['EVOMAN_PATH'] = '/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/  '
 
 from create_env import create_env
 
@@ -34,7 +21,10 @@ if __name__ == "__main__":
         LAUNCH_NUM = 1
         ENEMY_NUMBER = [2, 3, 5]
 
-N_GENERATIONS = 12
+TUNING_HOURS = 8
+N_GENERATIONS = 8
+
+root = os.getcwd()
 
 def train(params):
     """
@@ -65,12 +55,17 @@ def train(params):
     tournament_method = params['tournament_method']
     tournament_kwargs = params.get('tournament_kwargs', {})
 
-    experiment_name = f"experiments/enemy{ENEMY_NUMBER}_tournament{tournament_method.__name__}_mating{mating_num}_pop{population_size}_patience{patience}_DPR{doomsday_population_ratio}_DRWRP{doomsday_replace_with_random_prob}_mutGaus_mu0sigma1prob{deap_mutation_kwargs['indpb']}_{deap_crossover_method.__name__}_hyperopt"
+    enemy_number = params['enemy_number']
+
+    experiment_name = f"experiments/enemy{enemy_number}_tournament{tournament_method.__name__}_mating{mating_num}_pop{population_size}_patience{patience}_DPR{doomsday_population_ratio}_DRWRP{doomsday_replace_with_random_prob}_mutGaus_mu0sigma1prob{deap_mutation_kwargs['indpb']}_{deap_crossover_method.__name__}_generalist"
     print('experiment_name', experiment_name)
+    experiment_name = os.path.join(root, experiment_name)
+    print('path name', experiment_name)
     if not os.path.exists(experiment_name):
+        print('creating folder')
         os.makedirs(experiment_name)
 
-    env = create_env(experiment_name, ENEMY_NUMBER)
+    env = create_env(experiment_name, enemy_number)
 
     ea = EvolutionaryAlgorithm(env=env,
                                experiment_name=experiment_name,
@@ -87,6 +82,9 @@ def train(params):
                                deap_crossover_method=deap_crossover_method,
                                deap_crossover_kwargs=deap_crossover_kwargs)
     ea.train(generations=N_GENERATIONS)
+
+    env = create_env(experiment_name, [1, 2, 3, 4, 5, 6, 7, 8])
+    ea.env = env
     fitness_list = ea.test(n_times=5)
 
     # Send the current training result back to Tune
@@ -99,9 +97,9 @@ def train(params):
 search_space = {
     'type': hp.choice('type', [
         {
-            "type": 1,
+            "type": 'tournament',
             "mating_num": ho_scope.int(hp.quniform("mating_num1", 1, 10, q=1)),
-            "population_size": hp.choice("population_size1", [30, 100]),
+            "population_size": hp.choice("population_size1", [30, 70]),
             "patience": ho_scope.int(hp.quniform("patience1", 1, N_GENERATIONS, q=1)),
 
             "doomsday_population_ratio": hp.uniform("doomsday_population_ratio1", 0, 1),
@@ -119,11 +117,12 @@ search_space = {
             "tournament_method": hp.choice("tournament_method1", [selTournament]),
             "tournament_kwargs": hp.choice("tournament_kwargs1", [{"k": 2, "tournsize": 4},
                                                                   {"k": 2, "tournsize": 10}]),
+            "enemy_number": hp.choice("enemy_number1", [[1, 4, 7], [2, 4, 8]]),
         },
         {
-            "type": 2,
+            "type": 'proportional',
             "mating_num": ho_scope.int(hp.quniform("mating_num", 1, 10, q=1)),
-            "population_size": hp.choice("population_size2", [30, 100]),
+            "population_size": hp.choice("population_size2", [30, 70]),
             "patience": ho_scope.int(hp.quniform("patience", 1, N_GENERATIONS, q=1)),
             "doomsday_population_ratio": hp.uniform("doomsday_population_ratio", 0, 1),
             "doomsday_replace_with_random_prob": hp.uniform("doomsday_replace_with_random_prob", 0, 1),
@@ -139,62 +138,40 @@ search_space = {
 
             "tournament_method": hp.choice("tournament_method", [selProportional]),
             "tournament_kwargs": hp.choice("tournament_kwargs", [{"k": 2}]),  # may be hardcoded?
+            "enemy_number": hp.choice("enemy_number", [[1, 2, 3], [2, 5], [6, 7, 8]]),
         }
     ])}
 
 # for i in range(5):
 #     print(ho_sample(search_space))
 
-# Select a search algorithm for Hyperopt to use.
-algo = tpe.suggest  # Tree of Parzen Estimators, a Bayesian method
 
-if not USE_SPARK:
-    # # We can run Hyperopt locally (only on the driver machine)
-    # # by calling `fmin` without an explicit `trials` argument.
-    # best_hyperparameters = fmin(
-    #     fn=train,
-    #     space=search_space,
-    #     algo=algo,
-    #     max_evals=5,
-    #     timeout=3600)
-
-    from ray import tune
-    from ray.tune.suggest.hyperopt import HyperOptSearch
-    hyperopt_search = HyperOptSearch(search_space, metric="mean_accuracy", mode="max")
-
-    analysis = tune.run(train, num_samples=24,
-                        search_alg=hyperopt_search,
-                        time_budget_s=7200,
-                        verbose=3,
-                        # resources_per_trial={'gpu': 1}
-                        )
-    df = analysis.results_df
-    print(type(df), df)
-    df.to_csv('hyperopt_results.csv2')
-
-    # To enable GPUs, use this instead:
-    # analysis = tune.run(
-    #     train_mnist, config=search_space, resources_per_trial={'gpu': 1})
-
-
-else:
-    # We can distribute tuning across our Spark cluster
-    # by calling `fmin` with a `SparkTrials` instance.
-    spark_trials = SparkTrials()
-    best_hyperparameters = fmin(
-      fn=train,
-      space=search_space,
-      algo=algo,
-      trials=spark_trials,
-      max_evals=32)
-
-    for _ in range(32):
-        best_hyperparameters = fmin(
-            fn=train,
-            space=search_space,
-            algo=algo,
-            trials=spark_trials,
-            max_evals=len(spark_trials)+1)
-        plotting.main_plot_history(spark_trials)
-
+# # We can run Hyperopt locally (only on the driver machine)
+# # by calling `fmin` without an explicit `trials` argument.
+# best_hyperparameters = fmin(
+#     fn=train,
+#     space=search_space,
+#     algo=algo,
+#     max_evals=5,
+#     timeout=3600)
 # print('best_hyperparameters', best_hyperparameters)
+
+
+from ray import tune
+from ray.tune.suggest.hyperopt import HyperOptSearch
+from ray.tune.suggest.bayesopt import BayesOptSearch
+
+hyperopt_search = HyperOptSearch(search_space, metric="mean_accuracy", mode="max")
+# bayesopt_search = BayesOptSearch(search_space, metric="mean_accuracy", mode="max")
+
+analysis = tune.run(train,
+                    num_samples=48,
+                    search_alg=hyperopt_search,
+                    time_budget_s=3600*TUNING_HOURS,
+                    verbose=3,
+                    # resources_per_trial={'gpu': 1},  # to enable GPU
+                    )
+df = analysis.results_df
+prev_results = [path for path in os.listdir() if 'hyperopt_results' in path]
+df.to_csv(f'hyperopt_results_{len(prev_results) + 1}.csv')
+

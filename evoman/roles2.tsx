@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tileset name="roles" tilewidth="32" tileheight="32">
- <image source="evoman/images/roles.png" trans="ff00ff" width="450" height="32"/>
+ <image source="/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/images/roles.png" trans="ff00ff" width="450" height="32"/>
  <tile id="0">
   <properties>
    <property name="player" value="yes"/>

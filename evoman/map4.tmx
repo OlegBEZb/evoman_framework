@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" orientation="orthogonal" width="23" height="16" tilewidth="32" tileheight="32">
  <tileset firstgid="1" name="roles" tilewidth="32" tileheight="32">
-  <image source="evoman/images/roles.png" trans="ff00ff" width="450" height="32"/>
+  <image source="/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/images/roles.png" trans="ff00ff" width="450" height="32"/>
   <tile id="0">
    <properties>
     <property name="player" value="yes"/>
@@ -74,13 +74,13 @@
   </tile>
  </tileset>
  <tileset firstgid="15" name="download" tilewidth="32" tileheight="32">
-  <image source="evoman/images/download.jpg" trans="ff00ff" width="284" height="177"/>
+  <image source="/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/images/download.jpg" trans="ff00ff" width="284" height="177"/>
  </tileset>
  <tileset firstgid="55" name="water2" tilewidth="32" tileheight="32">
-  <image source="evoman/images/water2.jpg" trans="ff00ff" width="1300" height="800"/>
+  <image source="/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/images/water2.jpg" trans="ff00ff" width="1300" height="800"/>
  </tileset>
  <tileset firstgid="1055" name="bb" tilewidth="32" tileheight="32">
-  <image source="evoman/images/bb.jpeg" trans="ff00ff" width="240" height="179"/>
+  <image source="/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/images/bb.jpeg" trans="ff00ff" width="240" height="179"/>
  </tileset>
  <layer name="set" width="23" height="16" opacity="0.99">
   <data encoding="base64" compression="zlib">

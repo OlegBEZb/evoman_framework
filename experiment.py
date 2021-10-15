@@ -54,7 +54,7 @@ env = Environment(experiment_name=experiment_name,
                   level=2,
                   speed="fastest",
                   visualmode="no",  # requires environment adjustment
-                  multiplemode='no',
+                  multiplemode='yes',
                   randomini='yes')
 
 ea = EvolutionaryAlgorithm(env=env,
@@ -71,6 +71,17 @@ ea = EvolutionaryAlgorithm(env=env,
                            deap_mutation_kwargs=DEAP_MUTATION_KWARGS,
                            deap_crossover_method=DEAP_CROSSOVER_METHOD,
                            deap_crossover_kwargs=DEAP_CROSSOVER_KWARGS)
-ea.train(generations=20)
+ea.train(generations=1)
 
+env = Environment(experiment_name=experiment_name,
+                  enemies=[1,2,3,4,5,6,7,8],  # array with 1 to 8 items, values from 1 to 8
+                  playermode="ai",
+                  player_controller=player_controller,
+                  enemymode="static",
+                  level=2,
+                  speed="fastest",
+                  visualmode="yes",  # requires environment adjustment
+                  multiplemode='yes',
+                  randomini='yes')
+ea.env = env
 ea.test(n_times=5)

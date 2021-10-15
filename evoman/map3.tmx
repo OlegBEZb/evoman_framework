@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" orientation="orthogonal" width="23" height="16" tilewidth="32" tileheight="32">
- <tileset firstgid="1" source="evoman/roles3.tsx"/>
+ <tileset firstgid="1" source="/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/roles3.tsx"/>
  <tileset firstgid="15" name="tex2" tilewidth="32" tileheight="32">
-  <image source="evoman/images/tex2.jpg" trans="ff00ff" width="284" height="177"/>
+  <image source="/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/images/tex2.jpg" trans="ff00ff" width="284" height="177"/>
  </tileset>
  <tileset firstgid="55" name="tex4" tilewidth="32" tileheight="32">
-  <image source="evoman/images/tex4.jpg" trans="ff00ff" width="183" height="274"/>
+  <image source="/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman/images/tex4.jpg" trans="ff00ff" width="183" height="274"/>
  </tileset>
  <layer name="set" width="23" height="16">
   <data encoding="base64" compression="zlib">
