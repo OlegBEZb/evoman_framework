@@ -50,6 +50,7 @@ def selTournament(population, population_fitness, k, tournsize):
 
 
 def selProportional(population, population_fitness, k):
+    # avoiding negative probabilities, as fitness is ranges from negative numbers
     population_fitness = np.array(list(map(lambda y: norm(y, population_fitness), population_fitness)))
     probs = population_fitness / population_fitness.sum()
     rows = np.random.choice(population.shape[0], size=k, p=probs.ravel(), replace=False)
