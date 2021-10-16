@@ -11,6 +11,7 @@ import numpy as np
 
 from deap.tools.mutation import mutGaussian
 from deap.tools.crossover import *
+from custom_crossover import crossover_4_parents
 from selection import selBest, selRandom, selTournament, selProportional
 
 if __name__ == "__main__":
@@ -25,6 +26,7 @@ TUNING_HOURS = 8
 N_GENERATIONS = 8
 
 root = os.getcwd()
+
 
 def train(params):
     """
@@ -55,9 +57,12 @@ def train(params):
     tournament_method = params['tournament_method']
     tournament_kwargs = params.get('tournament_kwargs', {})
 
+    survivor_pool = params['survivor_pool']
+    survivor_selection_method = params['survivor_selection_method']
+
     enemy_number = params['enemy_number']
 
-    experiment_name = f"experiments/enemy{enemy_number}_tournament{tournament_method.__name__}_mating{mating_num}_pop{population_size}_patience{patience}_DPR{doomsday_population_ratio}_DRWRP{doomsday_replace_with_random_prob}_mutGaus_mu0sigma1prob{deap_mutation_kwargs['indpb']}_{deap_crossover_method.__name__}_generalist"
+    experiment_name = f"experiments/enemy{enemy_number}_tournament{tournament_method.__name__}_mating{mating_num}_pop{population_size}_patience{patience}_DPR{doomsday_population_ratio}_DRWRP{doomsday_replace_with_random_prob}_mutGaus_mu0sigma1prob{deap_mutation_kwargs['indpb']}_{deap_crossover_method.__name__}_survival_{survivor_pool}_{survivor_selection_method}_generalist"
     print('experiment_name', experiment_name)
     experiment_name = os.path.join(root, experiment_name)
     print('path name', experiment_name)
@@ -80,7 +85,10 @@ def train(params):
                                deap_mutation_operator=deap_mutation_operator,
                                deap_mutation_kwargs=deap_mutation_kwargs,
                                deap_crossover_method=deap_crossover_method,
-                               deap_crossover_kwargs=deap_crossover_kwargs)
+                               deap_crossover_kwargs=deap_crossover_kwargs,
+                               survivor_pool=survivor_pool,
+                               survivor_selection_method=survivor_selection_method,
+                               )
     ea.train(generations=N_GENERATIONS)
 
     env = create_env(experiment_name, [1, 2, 3, 4, 5, 6, 7, 8])
@@ -105,7 +113,7 @@ search_space = {
             "doomsday_population_ratio": hp.uniform("doomsday_population_ratio1", 0, 1),
             "doomsday_replace_with_random_prob": hp.uniform("doomsday_replace_with_random_prob1", 0, 1),
 
-            "deap_crossover_method": hp.choice("deap_crossover_method1", [cxUniform]),
+            "deap_crossover_method": hp.choice("deap_crossover_method1", [cxUniform, crossover_4_parents]),
             "deap_crossover_kwargs": hp.uniform("deap_crossover_kwargs1", 0, 1),
 
             "deap_mutation_operator": hp.choice("deap_mutation_operator1", [mutGaussian]),
@@ -117,7 +125,9 @@ search_space = {
             "tournament_method": hp.choice("tournament_method1", [selTournament]),
             "tournament_kwargs": hp.choice("tournament_kwargs1", [{"k": 2, "tournsize": 4},
                                                                   {"k": 2, "tournsize": 10}]),
-            "enemy_number": hp.choice("enemy_number1", [[1, 4, 7], [2, 4, 8]]),
+            "enemy_number": hp.choice("enemy_number1", [[1, 4, 7], [2, 4, 8], [1, 2], [5, 8]]),
+            "survivor_pool": hp.choice("survivor_pool1", ['all', 'offspring']),
+            "survivor_selection_method": hp.choice("survivor_selection_method1", [selProportional, selBest]),
         },
         {
             "type": 'proportional',
@@ -127,7 +137,7 @@ search_space = {
             "doomsday_population_ratio": hp.uniform("doomsday_population_ratio", 0, 1),
             "doomsday_replace_with_random_prob": hp.uniform("doomsday_replace_with_random_prob", 0, 1),
 
-            "deap_crossover_method": hp.choice("deap_crossover_method", [cxUniform]),
+            "deap_crossover_method": hp.choice("deap_crossover_method", [cxUniform, crossover_4_parents]),
             "deap_crossover_kwargs": hp.uniform("deap_crossover_kwargs", 0, 1),
 
             "deap_mutation_operator": hp.choice("deap_mutation_operator", [mutGaussian]),
@@ -138,7 +148,9 @@ search_space = {
 
             "tournament_method": hp.choice("tournament_method", [selProportional]),
             "tournament_kwargs": hp.choice("tournament_kwargs", [{"k": 2}]),  # may be hardcoded?
-            "enemy_number": hp.choice("enemy_number", [[1, 2, 3], [2, 5], [6, 7, 8]]),
+            "enemy_number": hp.choice("enemy_number", [[1, 2, 3], [2, 5], [6, 7, 8], [1, 4, 8], [3, 7, 8]]),
+            "survivor_pool": hp.choice("survivor_pool2", ['all', 'offspring']),
+            "survivor_selection_method": hp.choice("survivor_selection_method2", [selProportional, selBest]),
         }
     ])}
 
@@ -165,7 +177,7 @@ hyperopt_search = HyperOptSearch(search_space, metric="mean_accuracy", mode="max
 # bayesopt_search = BayesOptSearch(search_space, metric="mean_accuracy", mode="max")
 
 analysis = tune.run(train,
-                    num_samples=48,
+                    num_samples=1,
                     search_alg=hyperopt_search,
                     time_budget_s=3600*TUNING_HOURS,
                     verbose=3,

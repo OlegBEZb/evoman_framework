@@ -2,10 +2,10 @@ import os
 import sys
 import numpy as np
 from evoman.environment import Environment
-from selection import selRandom
+from selection import selRandom, selProportional
 from deap.tools.mutation import mutGaussian
 from deap.tools.crossover import cxOnePoint
-from custom_crossover import crossover_4_default
+from custom_crossover import crossover_4_parents
 import random
 import csv
 
@@ -27,7 +27,10 @@ class EvolutionaryAlgorithm:
                  deap_mutation_operator=mutGaussian,
                  deap_mutation_kwargs={},
                  deap_crossover_method=cxOnePoint,
-                 deap_crossover_kwargs={}, ):
+                 deap_crossover_kwargs={},
+                 survivor_pool="all",  # can be all or offspring
+                 survivor_selection_method=selProportional,
+                 ):
 
         self.env = env
 
@@ -52,6 +55,9 @@ class EvolutionaryAlgorithm:
         self.deap_mutation_kwargs = deap_mutation_kwargs
         self.deap_crossover_method = deap_crossover_method
         self.deap_crossover_kwargs = deap_crossover_kwargs
+
+        self.survivor_pool = survivor_pool
+        self.survivor_selection_method = survivor_selection_method
 
     def initialize_population(self):
         # initializes population loading old solutions or generating new ones
@@ -129,19 +135,16 @@ class EvolutionaryAlgorithm:
         for p in range(0, population.shape[0], 2):
             if self.tournament_method == selRandom:
                 parent_1, parent_2 = self.tournament_method(population, **self.tournament_kwargs)
-            elif self.tournament_method == crossover_4_default:
-                parent_1 = self.tournament(population, population_fitness)
-                parent_2 = self.tournament(population, population_fitness)
-                parent_3 = self.tournament(population, population_fitness)
-                parent_4 = self.tournament(population, population_fitness)
+            elif self.tournament_method == crossover_4_parents:
+                parent_1, parent_2, parent_3, parent_4 = self.tournament_method(population, population_fitness, k=4)
             else:
                 parent_1, parent_2 = self.tournament_method(population, population_fitness, **self.tournament_kwargs)
 
             children = []
             for _ in range(self.mating_num):
-                if self.tournament_method == crossover_4_default:
-                    children.extend(self.deap_crossover_method_4(parent_1, parent_2, parent_3,
-                                                                 parent_4 ** self.deap_crossover_kwargs_4))
+                if self.tournament_method == crossover_4_parents:
+                    children.extend(self.deap_crossover_method(parent_1, parent_2, parent_3,
+                                                                 parent_4, **self.deap_crossover_kwargs))
                 else:
                     children.extend(self.deap_crossover_method(parent_1, parent_2, **self.deap_crossover_kwargs))
 
@@ -199,8 +202,15 @@ class EvolutionaryAlgorithm:
 
             offspring = self.crossover(population, population_fitness)
             offspring_fitness = self.evaluate_in_simulation(offspring)
-            population = np.vstack((population, offspring))
-            population_fitness = np.append(population_fitness, offspring_fitness)
+
+            if self.survivor_pool == "all":
+                population = np.vstack((population, offspring))
+                population_fitness = np.append(population_fitness, offspring_fitness)
+            elif self.survivor_pool == "offspring":
+                population = offspring
+                population_fitness = offspring_fitness
+            else:
+                raise ValueError('survivor_pool should be all or offspring ', self.survivor_pool, ' given')
 
             best_individual_id, best_score, _, _, _ = self.get_population_stats(population_fitness, i)
 
@@ -212,13 +222,12 @@ class EvolutionaryAlgorithm:
                 np.savetxt(os.path.join(self.experiment_name, 'best_solution.txt'), population[best_individual_id])
 
             # selection
-            fit_pop_norm = np.array(list(map(lambda y: norm(y, population_fitness),
-                                             population_fitness)))  # avoiding negative probabilities, as fitness is ranges from negative numbers
-            probs = (fit_pop_norm) / (fit_pop_norm).sum()
-            selected_indices = np.random.choice(population.shape[0], self.population_size - 1, p=probs, replace=False)
-            selected_indices = np.append(selected_indices, best_individual_id)
-            population = population[selected_indices]
-            population_fitness = population_fitness[selected_indices]
+            best_individual = population[best_individual_id]
+            population = self.survivor_selection_method(population, population_fitness,
+                                                        self.population_size - 1)
+            population = np.stack(population, axis=0)
+            population = np.vstack((population, best_individual))
+            population_fitness = self.evaluate_in_simulation(population)
 
             if gens_without_improvement >= self.patience:
                 # file_aux = open(self.experiment_name + '/results.txt', 'a')
