@@ -9,7 +9,7 @@ from controllers import PlayerController
 from optimizers import EvolutionaryAlgorithm
 from deap.tools.mutation import mutGaussian
 from deap.tools.crossover import *
-from custom_crossover import cx4ParentsCustomUniform
+from custom_crossover import cx4ParentsCustomUniform, cxMultiParentUniform
 from selection import selBest, selRandom, selTournament, selProportional
 
 if __name__ == "__main__":
@@ -27,19 +27,19 @@ PATIENCE = 17
 DOOMSDAY_POPULATION_RATIO = 0.3
 DOOMSDAY_REPLACE_WITH_RANDOM_PROB = 0.75
 
-DEAP_CROSSOVER_METHOD = cxUniform
+DEAP_CROSSOVER_METHOD = cx4ParentsCustomUniform
 DEAP_CROSSOVER_KWARGS = {"indpb": 0.6}
 
 DEAP_MUTATION_OPERATOR = mutGaussian
 DEAP_MUTATION_KWARGS = {"mu": 0, "sigma": 1, "indpb": 0.8}
 
 TOURNAMENT_METHOD = selProportional
-TOURNAMENT_KWARGS = {'k': 2}
+TOURNAMENT_KWARGS = {'k': 4}
 
 SURVIVOR_POOL = 'all'
 SURVIVOR_SELECTION_METHOD = selBest
 
-experiment_name = f"""experiments/enemy{ENEMY_NUMBER}_tournament{TOURNAMENT_METHOD.__name__}{dict2str(TOURNAMENT_KWARGS).replace('"', '')}_mating{MATING_NUM}_pop{POPULATION_SIZE}_patience{PATIENCE}_DPR{DOOMSDAY_POPULATION_RATIO}_DRWRP{DOOMSDAY_REPLACE_WITH_RANDOM_PROB}_mutGaus_mu0sigma1prob{DEAP_MUTATION_KWARGS['indpb']}_{DEAP_CROSSOVER_METHOD.__name__}{DEAP_CROSSOVER_KWARGS['indpb']}_LAUNCH_{LAUNCH_NUM}"""
+experiment_name = f"""experiments/enemy{ENEMY_NUMBER}_tournament{TOURNAMENT_METHOD.__name__}{dict2str(TOURNAMENT_KWARGS)}_mating{MATING_NUM}_pop{POPULATION_SIZE}_patience{PATIENCE}_DPR{DOOMSDAY_POPULATION_RATIO}_DRWRP{DOOMSDAY_REPLACE_WITH_RANDOM_PROB}_mutGaus_mu0sigma1prob{DEAP_MUTATION_KWARGS['indpb']}_{DEAP_CROSSOVER_METHOD.__name__}{dict2str(DEAP_CROSSOVER_KWARGS)}_LAUNCH_{LAUNCH_NUM}"""
 
 print('experiment_name', experiment_name)
 if not os.path.exists(experiment_name):

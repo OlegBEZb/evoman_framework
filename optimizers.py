@@ -5,7 +5,7 @@ from evoman.environment import Environment
 from selection import selRandom, selProportional
 from deap.tools.mutation import mutGaussian
 from deap.tools.crossover import cxOnePoint
-from custom_crossover import cx4ParentsCustomUniform
+from custom_crossover import cx4ParentsCustomUniform, cxMultiParentUniform
 import random
 import csv
 
@@ -132,27 +132,18 @@ class EvolutionaryAlgorithm:
         """
         total_offspring = np.zeros((0, self.weights_num))
 
-        for p in range(0, population.shape[0], 2):
+        for parents_set in range(0, population.shape[0], self.tournament_kwargs['k']):  # define a variable for the number of parents sets
             if self.tournament_method == selRandom:
-                if self.deap_crossover_method == cx4ParentsCustomUniform:
-                    self.tournament_kwargs.update({'k': 4})
-                    parent_1, parent_2, parent_3, parent_4 = self.tournament_method(population, **self.tournament_kwargs)
-                else:
-                    parent_1, parent_2 = self.tournament_method(population, **self.tournament_kwargs)
+                parents = self.tournament_method(population, **self.tournament_kwargs)
             else:
-                if self.deap_crossover_method == cx4ParentsCustomUniform:
-                    self.tournament_kwargs.update({'k': 4})
-                    parent_1, parent_2, parent_3, parent_4 = self.tournament_method(population, population_fitness, **self.tournament_kwargs)
-                else:
-                    parent_1, parent_2 = self.tournament_method(population, population_fitness, **self.tournament_kwargs)
+                parents = self.tournament_method(population, population_fitness, **self.tournament_kwargs)
 
             children = []
             for _ in range(self.mating_num):
-                if self.deap_crossover_method == cx4ParentsCustomUniform:
-                    children.extend(self.deap_crossover_method(parent_1, parent_2, parent_3,
-                                                               parent_4, **self.deap_crossover_kwargs))
+                if self.deap_crossover_method in [cx4ParentsCustomUniform, cxMultiParentUniform]:
+                    children.extend(self.deap_crossover_method(parents, **self.deap_crossover_kwargs))
                 else:
-                    children.extend(self.deap_crossover_method(parent_1, parent_2, **self.deap_crossover_kwargs))
+                    children.extend(self.deap_crossover_method(parents[0], parents[1], **self.deap_crossover_kwargs))
 
             offspring = random.sample(children, random.randint(1, len(children)))
             offspring = self.mutation(offspring)

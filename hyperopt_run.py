@@ -7,12 +7,15 @@ import sys, os
 from create_env import create_env
 
 from optimizers import EvolutionaryAlgorithm
-import numpy as np
 
 from deap.tools.mutation import mutGaussian
 from deap.tools.crossover import *
-from custom_crossover import cx4ParentsCustomUniform
+from custom_crossover import *
 from selection import selBest, selRandom, selTournament, selProportional
+
+from ray import tune
+from ray.tune.suggest.hyperopt import HyperOptSearch
+from ray.tune.schedulers import ASHAScheduler
 
 if __name__ == "__main__":
     try:
@@ -22,8 +25,8 @@ if __name__ == "__main__":
         LAUNCH_NUM = 1
         ENEMY_NUMBER = [2, 3, 5]
 
-TUNING_HOURS = 8
-N_GENERATIONS = 8
+TUNING_HOURS = 3
+N_GENERATIONS = 5
 
 root = os.getcwd()
 
@@ -104,8 +107,81 @@ def train(params):
 # Next, define a search space for Hyperopt.
 search_space = {
     'type': hp.choice('type', [
-        {
-            "type": 'tournament',
+        # {
+        #     "type": 'tournament',
+        #     "mating_num": ho_scope.int(hp.quniform("mating_num1", 1, 10, q=1)),
+        #     "population_size": hp.choice("population_size1", [30, 70]),
+        #     "patience": ho_scope.int(hp.quniform("patience1", 1, N_GENERATIONS, q=1)),
+        #
+        #     "doomsday_population_ratio": hp.uniform("doomsday_population_ratio1", 0, 1),
+        #     "doomsday_replace_with_random_prob": hp.uniform("doomsday_replace_with_random_prob1", 0, 1),
+        #
+        #     "deap_crossover_method": hp.choice("deap_crossover_method1", [cxUniform]),  # tournament_kwargs['k'] should be correspondent
+        #     "deap_crossover_kwargs": hp.uniform("deap_crossover_kwargs1", 0, 1),
+        #
+        #     "deap_mutation_operator": hp.choice("deap_mutation_operator1", [mutGaussian]),
+        #     "deap_mutation_kwargs": hp.choice("deap_mutation_kwargs1", [{"mu": 0, "sigma": 1, "indpb": 0.3},
+        #                                                                 {"mu": 0, "sigma": 1, "indpb": 0.6},
+        #                                                                 {"mu": 0, "sigma": 1, "indpb": 0.2},
+        #                                                                 {"mu": 0, "sigma": 1, "indpb": 0.8}]),
+        #
+        #     "tournament_method": hp.choice("tournament_method1", [selTournament]),
+        #     "tournament_kwargs": hp.choice("tournament_kwargs1", [{"k": 2, "tournsize": 4},
+        #                                                           {"k": 2, "tournsize": 10}]),
+        #     "enemy_number": hp.choice("enemy_number1", [[1, 4, 7], [2, 4, 8], [1, 5, 6], [3, 5, 8]]),
+        #     "survivor_pool": hp.choice("survivor_pool1", ['all', 'offspring']),
+        #     "survivor_selection_method": hp.choice("survivor_selection_method1", [selProportional, selBest]),
+        # },
+        # {
+        #     "type": 'proportional',
+        #     "mating_num": ho_scope.int(hp.quniform("mating_num", 1, 10, q=1)),
+        #     "population_size": hp.choice("population_size2", [30, 70]),
+        #     "patience": ho_scope.int(hp.quniform("patience", 1, N_GENERATIONS, q=1)),
+        #     "doomsday_population_ratio": hp.uniform("doomsday_population_ratio", 0, 1),
+        #     "doomsday_replace_with_random_prob": hp.uniform("doomsday_replace_with_random_prob", 0, 1),
+        #
+        #     "deap_crossover_method": hp.choice("deap_crossover_method", [cxUniform]),
+        #     "deap_crossover_kwargs": hp.uniform("deap_crossover_kwargs", 0, 1),
+        #
+        #     "deap_mutation_operator": hp.choice("deap_mutation_operator", [mutGaussian]),
+        #     "deap_mutation_kwargs": hp.choice("deap_mutation_kwargs", [{"mu": 0, "sigma": 1, "indpb": 0.3},
+        #                                                                {"mu": 0, "sigma": 1, "indpb": 0.6},
+        #                                                                {"mu": 0, "sigma": 1, "indpb": 0.2},
+        #                                                                {"mu": 0, "sigma": 1, "indpb": 0.8}]),
+        #
+        #     "tournament_method": hp.choice("tournament_method", [selProportional]),
+        #     "tournament_kwargs": hp.choice("tournament_kwargs", [{"k": 2}]),  # may be hardcoded?
+        #     "enemy_number": hp.choice("enemy_number", [[1, 2, 3], [6, 7, 8], [1, 4, 8], [3, 7, 8]]),
+        #     "survivor_pool": hp.choice("survivor_pool2", ['all', 'offspring']),
+        #     "survivor_selection_method": hp.choice("survivor_selection_method2", [selProportional, selBest]),
+        # },
+{
+            "type": 'tournament_4_parents',
+            "mating_num": ho_scope.int(hp.quniform("mating_num3", 1, 10, q=1)),
+            "population_size": hp.choice("population_size3", [30, 70]),
+            "patience": ho_scope.int(hp.quniform("patience3", 1, N_GENERATIONS, q=1)),
+
+            "doomsday_population_ratio": hp.uniform("doomsday_population_ratio3", 0, 1),
+            "doomsday_replace_with_random_prob": hp.uniform("doomsday_replace_with_random_prob3", 0, 1),
+
+            "deap_crossover_method": hp.choice("deap_crossover_method3", [cx4ParentsCustomUniform]),
+            "deap_crossover_kwargs": hp.uniform("deap_crossover_kwargs3", 0, 1),
+
+            "deap_mutation_operator": hp.choice("deap_mutation_operator3", [mutGaussian]),
+            "deap_mutation_kwargs": hp.choice("deap_mutation_kwargs3", [{"mu": 0, "sigma": 1, "indpb": 0.3},
+                                                                        {"mu": 0, "sigma": 1, "indpb": 0.6},
+                                                                        {"mu": 0, "sigma": 1, "indpb": 0.2},
+                                                                        {"mu": 0, "sigma": 1, "indpb": 0.8}]),
+
+            "tournament_method": hp.choice("tournament_method3", [selTournament]),
+            "tournament_kwargs": hp.choice("tournament_kwargs3", [{"k": 4, "tournsize": 8},
+                                                                  {"k": 4, "tournsize": 5}]),
+            "enemy_number": hp.choice("enemy_number3", [[1, 4, 7], [2, 4, 8], [1, 2], [5, 8]]),
+            "survivor_pool": hp.choice("survivor_pool3", ['all', 'offspring']),
+            "survivor_selection_method": hp.choice("survivor_selection_method3", [selProportional, selBest]),
+        },
+{
+            "type": 'tournament_multi_parents',
             "mating_num": ho_scope.int(hp.quniform("mating_num1", 1, 10, q=1)),
             "population_size": hp.choice("population_size1", [30, 70]),
             "patience": ho_scope.int(hp.quniform("patience1", 1, N_GENERATIONS, q=1)),
@@ -113,8 +189,8 @@ search_space = {
             "doomsday_population_ratio": hp.uniform("doomsday_population_ratio1", 0, 1),
             "doomsday_replace_with_random_prob": hp.uniform("doomsday_replace_with_random_prob1", 0, 1),
 
-            "deap_crossover_method": hp.choice("deap_crossover_method1", [cxUniform, cx4ParentsCustomUniform]),
-            "deap_crossover_kwargs": hp.uniform("deap_crossover_kwargs1", 0, 1),
+            "deap_crossover_method": hp.choice("deap_crossover_method1", [cxMultiParentUniform]),
+            # "deap_crossover_kwargs": hp.choice([{}]),
 
             "deap_mutation_operator": hp.choice("deap_mutation_operator1", [mutGaussian]),
             "deap_mutation_kwargs": hp.choice("deap_mutation_kwargs1", [{"mu": 0, "sigma": 1, "indpb": 0.3},
@@ -123,35 +199,13 @@ search_space = {
                                                                         {"mu": 0, "sigma": 1, "indpb": 0.8}]),
 
             "tournament_method": hp.choice("tournament_method1", [selTournament]),
-            "tournament_kwargs": hp.choice("tournament_kwargs1", [{"k": 2, "tournsize": 4},
-                                                                  {"k": 2, "tournsize": 10}]),
+            "tournament_kwargs": hp.choice("tournament_kwargs1", [{"k": 5, "tournsize": 10},
+                                                                  {"k": 4, "tournsize": 8},
+                                                                  {"k": 3, "tournsize": 8}]),
             "enemy_number": hp.choice("enemy_number1", [[1, 4, 7], [2, 4, 8], [1, 2], [5, 8]]),
             "survivor_pool": hp.choice("survivor_pool1", ['all', 'offspring']),
             "survivor_selection_method": hp.choice("survivor_selection_method1", [selProportional, selBest]),
         },
-        {
-            "type": 'proportional',
-            "mating_num": ho_scope.int(hp.quniform("mating_num", 1, 10, q=1)),
-            "population_size": hp.choice("population_size2", [30, 70]),
-            "patience": ho_scope.int(hp.quniform("patience", 1, N_GENERATIONS, q=1)),
-            "doomsday_population_ratio": hp.uniform("doomsday_population_ratio", 0, 1),
-            "doomsday_replace_with_random_prob": hp.uniform("doomsday_replace_with_random_prob", 0, 1),
-
-            "deap_crossover_method": hp.choice("deap_crossover_method", [cxUniform, cx4ParentsCustomUniform]),
-            "deap_crossover_kwargs": hp.uniform("deap_crossover_kwargs", 0, 1),
-
-            "deap_mutation_operator": hp.choice("deap_mutation_operator", [mutGaussian]),
-            "deap_mutation_kwargs": hp.choice("deap_mutation_kwargs", [{"mu": 0, "sigma": 1, "indpb": 0.3},
-                                                                       {"mu": 0, "sigma": 1, "indpb": 0.6},
-                                                                       {"mu": 0, "sigma": 1, "indpb": 0.2},
-                                                                       {"mu": 0, "sigma": 1, "indpb": 0.8}]),
-
-            "tournament_method": hp.choice("tournament_method", [selProportional]),
-            "tournament_kwargs": hp.choice("tournament_kwargs", [{"k": 2}]),  # may be hardcoded?
-            "enemy_number": hp.choice("enemy_number", [[1, 2, 3], [2, 5], [6, 7, 8], [1, 4, 8], [3, 7, 8]]),
-            "survivor_pool": hp.choice("survivor_pool2", ['all', 'offspring']),
-            "survivor_selection_method": hp.choice("survivor_selection_method2", [selProportional, selBest]),
-        }
     ])}
 
 # for i in range(5):
@@ -169,21 +223,29 @@ search_space = {
 # print('best_hyperparameters', best_hyperparameters)
 
 
-from ray import tune
-from ray.tune.suggest.hyperopt import HyperOptSearch
-from ray.tune.suggest.bayesopt import BayesOptSearch
+
 
 hyperopt_search = HyperOptSearch(search_space, metric="mean_accuracy", mode="max")
-# bayesopt_search = BayesOptSearch(search_space, metric="mean_accuracy", mode="max")
 
 analysis = tune.run(train,
-                    num_samples=8*16,
+                    num_samples=8*1,
                     search_alg=hyperopt_search,
                     time_budget_s=3600*TUNING_HOURS,
                     verbose=3,
+                    scheduler=ASHAScheduler(metric="mean_accuracy", mode="max"),
                     # resources_per_trial={'gpu': 1},  # to enable GPU
                     )
 df = analysis.results_df
 prev_results = [path for path in os.listdir() if 'hyperopt_results' in path]
 df.to_csv(f'hyperopt_results_{len(prev_results) + 1}.csv')
+
+# Obtain a trial dataframe from all run trials of this `tune.run` call.
+dfs = analysis.trial_dataframes
+# Plot by epoch
+ax = None  # This plots everything on the same plot
+for d in dfs.values():
+    ax = d.mean_accuracy.plot(ax=ax, legend=False)
+ax.set_xlabel('Epochs')
+ax.set_ylabel("Mean Accuracy")
+ax.savefig(f'hyperopt_epochs_{len(prev_results) + 1}.png')
 
