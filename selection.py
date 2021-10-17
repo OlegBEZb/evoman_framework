@@ -14,7 +14,11 @@ def selRandom(population, k):
     This function uses the :func:`~random.choice` function from the
     python base :mod:`random` module.
     """
-    rows = np.random.choice(population.shape[0], k, replace=False)
+    if k >= len(population):
+        replace = True
+    else:
+        replace = False
+    rows = np.random.choice(population.shape[0], k, replace=replace)
     individuals = population[rows]
     return individuals
 
@@ -53,5 +57,9 @@ def selProportional(population, population_fitness, k):
     # avoiding negative probabilities, as fitness is ranges from negative numbers
     population_fitness = np.array(list(map(lambda y: norm(y, population_fitness), population_fitness)))
     probs = population_fitness / population_fitness.sum()
-    rows = np.random.choice(population.shape[0], size=k, p=probs.ravel(), replace=False)
+    if k >= len(population):
+        replace = True
+    else:
+        replace = False
+    rows = np.random.choice(population.shape[0], size=k, p=probs.ravel(), replace=replace)
     return population[rows]

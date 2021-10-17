@@ -5,7 +5,7 @@ from evoman.environment import Environment
 from selection import selRandom, selProportional
 from deap.tools.mutation import mutGaussian
 from deap.tools.crossover import cxOnePoint
-from custom_crossover import crossover_4_parents
+from custom_crossover import cx4ParentsCustomUniform
 import random
 import csv
 
@@ -134,17 +134,23 @@ class EvolutionaryAlgorithm:
 
         for p in range(0, population.shape[0], 2):
             if self.tournament_method == selRandom:
-                parent_1, parent_2 = self.tournament_method(population, **self.tournament_kwargs)
-            elif self.tournament_method == crossover_4_parents:
-                parent_1, parent_2, parent_3, parent_4 = self.tournament_method(population, population_fitness, k=4)
+                if self.deap_crossover_method == cx4ParentsCustomUniform:
+                    self.tournament_kwargs.update({'k': 4})
+                    parent_1, parent_2, parent_3, parent_4 = self.tournament_method(population, **self.tournament_kwargs)
+                else:
+                    parent_1, parent_2 = self.tournament_method(population, **self.tournament_kwargs)
             else:
-                parent_1, parent_2 = self.tournament_method(population, population_fitness, **self.tournament_kwargs)
+                if self.deap_crossover_method == cx4ParentsCustomUniform:
+                    self.tournament_kwargs.update({'k': 4})
+                    parent_1, parent_2, parent_3, parent_4 = self.tournament_method(population, population_fitness, **self.tournament_kwargs)
+                else:
+                    parent_1, parent_2 = self.tournament_method(population, population_fitness, **self.tournament_kwargs)
 
             children = []
             for _ in range(self.mating_num):
-                if self.tournament_method == crossover_4_parents:
+                if self.deap_crossover_method == cx4ParentsCustomUniform:
                     children.extend(self.deap_crossover_method(parent_1, parent_2, parent_3,
-                                                                 parent_4, **self.deap_crossover_kwargs))
+                                                               parent_4, **self.deap_crossover_kwargs))
                 else:
                     children.extend(self.deap_crossover_method(parent_1, parent_2, **self.deap_crossover_kwargs))
 

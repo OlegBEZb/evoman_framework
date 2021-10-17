@@ -11,7 +11,7 @@ import numpy as np
 
 from deap.tools.mutation import mutGaussian
 from deap.tools.crossover import *
-from custom_crossover import crossover_4_parents
+from custom_crossover import cx4ParentsCustomUniform
 from selection import selBest, selRandom, selTournament, selProportional
 
 if __name__ == "__main__":
@@ -62,7 +62,7 @@ def train(params):
 
     enemy_number = params['enemy_number']
 
-    experiment_name = f"experiments/enemy{enemy_number}_tournament{tournament_method.__name__}_mating{mating_num}_pop{population_size}_patience{patience}_DPR{doomsday_population_ratio}_DRWRP{doomsday_replace_with_random_prob}_mutGaus_mu0sigma1prob{deap_mutation_kwargs['indpb']}_{deap_crossover_method.__name__}_survival_{survivor_pool}_{survivor_selection_method}_generalist"
+    experiment_name = f"experiments/enemy{enemy_number}_tournament{tournament_method.__name__}_mating{mating_num}_pop{population_size}_patience{patience}_DPR{doomsday_population_ratio}_DRWRP{doomsday_replace_with_random_prob}_mutGaus_mu0sigma1prob{deap_mutation_kwargs['indpb']}_{deap_crossover_method.__name__}_survival_{survivor_pool}_{survivor_selection_method.__name__}_generalist"
     print('experiment_name', experiment_name)
     experiment_name = os.path.join(root, experiment_name)
     print('path name', experiment_name)
@@ -113,7 +113,7 @@ search_space = {
             "doomsday_population_ratio": hp.uniform("doomsday_population_ratio1", 0, 1),
             "doomsday_replace_with_random_prob": hp.uniform("doomsday_replace_with_random_prob1", 0, 1),
 
-            "deap_crossover_method": hp.choice("deap_crossover_method1", [cxUniform, crossover_4_parents]),
+            "deap_crossover_method": hp.choice("deap_crossover_method1", [cxUniform, cx4ParentsCustomUniform]),
             "deap_crossover_kwargs": hp.uniform("deap_crossover_kwargs1", 0, 1),
 
             "deap_mutation_operator": hp.choice("deap_mutation_operator1", [mutGaussian]),
@@ -137,7 +137,7 @@ search_space = {
             "doomsday_population_ratio": hp.uniform("doomsday_population_ratio", 0, 1),
             "doomsday_replace_with_random_prob": hp.uniform("doomsday_replace_with_random_prob", 0, 1),
 
-            "deap_crossover_method": hp.choice("deap_crossover_method", [cxUniform, crossover_4_parents]),
+            "deap_crossover_method": hp.choice("deap_crossover_method", [cxUniform, cx4ParentsCustomUniform]),
             "deap_crossover_kwargs": hp.uniform("deap_crossover_kwargs", 0, 1),
 
             "deap_mutation_operator": hp.choice("deap_mutation_operator", [mutGaussian]),
@@ -177,7 +177,7 @@ hyperopt_search = HyperOptSearch(search_space, metric="mean_accuracy", mode="max
 # bayesopt_search = BayesOptSearch(search_space, metric="mean_accuracy", mode="max")
 
 analysis = tune.run(train,
-                    num_samples=1,
+                    num_samples=8*16,
                     search_alg=hyperopt_search,
                     time_budget_s=3600*TUNING_HOURS,
                     verbose=3,

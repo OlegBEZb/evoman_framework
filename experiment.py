@@ -9,7 +9,7 @@ from controllers import PlayerController
 from optimizers import EvolutionaryAlgorithm
 from deap.tools.mutation import mutGaussian
 from deap.tools.crossover import *
-from custom_crossover import crossover_4_default
+from custom_crossover import cx4ParentsCustomUniform
 from selection import selBest, selRandom, selTournament, selProportional
 
 if __name__ == "__main__":
@@ -21,7 +21,7 @@ if __name__ == "__main__":
         ENEMY_NUMBER = 1
 
 MATING_NUM = 3
-POPULATION_SIZE = 50
+POPULATION_SIZE = 20
 PATIENCE = 17
 
 DOOMSDAY_POPULATION_RATIO = 0.3
@@ -35,6 +35,9 @@ DEAP_MUTATION_KWARGS = {"mu": 0, "sigma": 1, "indpb": 0.8}
 
 TOURNAMENT_METHOD = selProportional
 TOURNAMENT_KWARGS = {'k': 2}
+
+SURVIVOR_POOL = 'all'
+SURVIVOR_SELECTION_METHOD = selBest
 
 experiment_name = f"""experiments/enemy{ENEMY_NUMBER}_tournament{TOURNAMENT_METHOD.__name__}{dict2str(TOURNAMENT_KWARGS).replace('"', '')}_mating{MATING_NUM}_pop{POPULATION_SIZE}_patience{PATIENCE}_DPR{DOOMSDAY_POPULATION_RATIO}_DRWRP{DOOMSDAY_REPLACE_WITH_RANDOM_PROB}_mutGaus_mu0sigma1prob{DEAP_MUTATION_KWARGS['indpb']}_{DEAP_CROSSOVER_METHOD.__name__}{DEAP_CROSSOVER_KWARGS['indpb']}_LAUNCH_{LAUNCH_NUM}"""
 
@@ -54,7 +57,7 @@ env = Environment(experiment_name=experiment_name,
                   level=2,
                   speed="fastest",
                   visualmode="no",  # requires environment adjustment
-                  multiplemode='yes',
+                  multiplemode='no',
                   randomini='yes')
 
 ea = EvolutionaryAlgorithm(env=env,
@@ -70,11 +73,14 @@ ea = EvolutionaryAlgorithm(env=env,
                            deap_mutation_operator=DEAP_MUTATION_OPERATOR,
                            deap_mutation_kwargs=DEAP_MUTATION_KWARGS,
                            deap_crossover_method=DEAP_CROSSOVER_METHOD,
-                           deap_crossover_kwargs=DEAP_CROSSOVER_KWARGS)
-ea.train(generations=1)
+                           deap_crossover_kwargs=DEAP_CROSSOVER_KWARGS,
+                           survivor_pool=SURVIVOR_POOL,  # can be all or offspring
+                           survivor_selection_method=SURVIVOR_SELECTION_METHOD,
+                           )
+ea.train(generations=10)
 
 env = Environment(experiment_name=experiment_name,
-                  enemies=[1,2,3,4,5,6,7,8],  # array with 1 to 8 items, values from 1 to 8
+                  enemies=[1, 2, 3, 4, 5, 6, 7, 8],  # array with 1 to 8 items, values from 1 to 8
                   playermode="ai",
                   player_controller=player_controller,
                   enemymode="static",
