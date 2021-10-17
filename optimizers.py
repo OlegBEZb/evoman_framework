@@ -111,9 +111,17 @@ class EvolutionaryAlgorithm:
         fitness, player_life, enemy_life, time = env.play(pcont=x)
         return fitness
 
-    def evaluate_in_simulation(self, x):
+    @staticmethod
+    def simulation_gain(env, x):
+        fitness, player_life, enemy_life, time = env.play(pcont=x)
+        return player_life - enemy_life
+
+    def evaluate_in_simulation(self, x, gain_not_fitness=False):
         # simulates each of x
-        return np.array(list(map(lambda y: self.simulation(self.env, y), x)))
+        if gain_not_fitness:
+            return np.array(list(map(lambda y: self.simulation_gain(self.env, y), x)))
+        else:
+            return np.array(list(map(lambda y: self.simulation(self.env, y), x)))
 
     def crossover(self, population, population_fitness):
         """
@@ -132,7 +140,8 @@ class EvolutionaryAlgorithm:
         """
         total_offspring = np.zeros((0, self.weights_num))
 
-        for parents_set in range(0, population.shape[0], self.tournament_kwargs['k']):  # define a variable for the number of parents sets
+        for parents_set in range(0, population.shape[0],
+                                 self.tournament_kwargs['k']):  # define a variable for the number of parents sets
             if self.tournament_method == selRandom:
                 parents = self.tournament_method(population, **self.tournament_kwargs)
             else:
@@ -265,7 +274,7 @@ class EvolutionaryAlgorithm:
 
         return best_individual_id, best_score, fitness_mean, fitness_std, msg
 
-    def test(self, n_times=5):
+    def test(self, n_times=5, gain_not_fitness=False):
         # try:
         #     del os.environ['SDL_VIDEODRIVER']
         # except:
@@ -277,7 +286,7 @@ class EvolutionaryAlgorithm:
             print('RUNNING SAVED BEST SOLUTION')
             self.env.update_parameter('speed', 'normal')
             self.env.update_parameter('visualmode', 'yes')
-            fitness = self.evaluate_in_simulation([best_solution])
+            fitness = self.evaluate_in_simulation([best_solution], gain_not_fitness=gain_not_fitness)
             fitness_list.append(fitness)
 
         np.savetxt(os.path.join(self.experiment_name, 'test_results.txt'), fitness_list)

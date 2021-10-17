@@ -46,7 +46,7 @@ class PlayerController(Controller):
 
         # Preparing the weights and biases from the controller of layer 2
         bias2 = controller[weights1_slice:weights1_slice + self.hidden_layer_sizes[1]].reshape(1, self.hidden_layer_sizes[1])
-        weights2 = controller[weights1_slice + 5:].reshape((self.hidden_layer_sizes[0], self.hidden_layer_sizes[1]))
+        weights2 = controller[weights1_slice + self.hidden_layer_sizes[1]:].reshape((self.hidden_layer_sizes[0], self.hidden_layer_sizes[1]))
 
         # Outputting activated second layer. Each entry in the output is an action
         output = sigmoid_activation(output1.dot(weights2) + bias2)[0]
@@ -65,7 +65,8 @@ class PlayerController(Controller):
 
         return [left, right, jump, shoot, release]
 
-    def make_decision(self, output):
+    @staticmethod
+    def make_decision(output):
         if output > 0.5:
             action = 1
         else:

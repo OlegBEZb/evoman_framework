@@ -1,4 +1,5 @@
 random
+matplotlib
 pygame==2.0.2
 sklearn
 pandas
