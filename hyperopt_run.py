@@ -44,28 +44,28 @@ def train(params):
   """
     # params = params['type']
 
-    mating_num = 5  # params['mating_num']
+    mating_num = 9  # params['mating_num']
     population_size = 70  # params['population_size']
-    patience = 4  # params['patience']
+    patience = 1  # params['patience']
 
-    doomsday_population_ratio = 0.985554  # params['doomsday_population_ratio']
-    doomsday_replace_with_random_prob = 0.118180  # params['doomsday_replace_with_random_prob']
+    doomsday_population_ratio = 0.879224  # params['doomsday_population_ratio']
+    doomsday_replace_with_random_prob = 0.980352  # params['doomsday_replace_with_random_prob']
 
-    deap_crossover_method = cxUniform  # params['deap_crossover_method']
-    deap_crossover_kwargs = {"indpb": 0.652507}  # params.get('deap_crossover_kwargs', {})
+    deap_crossover_method = cxMultiParentUniform  # params['deap_crossover_method']
+    deap_crossover_kwargs = {}  # params.get('deap_crossover_kwargs', {})
     if not isinstance(deap_crossover_kwargs, dict):
         deap_crossover_kwargs = {"indpb": deap_crossover_kwargs}
 
     deap_mutation_operator = mutGaussian  # params['deap_mutation_operator']
-    deap_mutation_kwargs = {"mu": 0, "sigma": 1, "indpb": 0.3}  # params.get('deap_mutation_kwargs', {})
+    deap_mutation_kwargs = {"mu": 0, "sigma": 1, "indpb": 0.6}  # params.get('deap_mutation_kwargs', {})
 
-    tournament_method = selProportional  # params['tournament_method']
-    tournament_kwargs = {'k': 2}  #params.get('tournament_kwargs', {})
+    tournament_method = selTournament  # params['tournament_method']
+    tournament_kwargs = {'k': 4, 'tournsize': 8}  #params.get('tournament_kwargs', {})
 
     survivor_pool = "all"  # params['survivor_pool']
     survivor_selection_method = selProportional  # params['survivor_selection_method']
 
-    enemy_number = [6, 7, 8]  # params['enemy_number']
+    enemy_number = params['enemy_number']
 
     experiment_name = f"experiments/enemy{enemy_number}_tournament{tournament_method.__name__}{dict2str(tournament_kwargs)}_mating{mating_num}_pop{population_size}_patience{patience}_DPR{doomsday_population_ratio}_DRWRP{doomsday_replace_with_random_prob}_mutGaus_{dict2str(deap_mutation_kwargs)}_{deap_crossover_method.__name__}_{dict2str(deap_crossover_kwargs)}_survival_{survivor_pool}_{survivor_selection_method.__name__}_generalist"
 
@@ -289,5 +289,6 @@ search_space = {
 tune.run(train,
     config={
         "launch_n": tune.grid_search([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
+        "enemy_number": tune.grid_search([[2, 4, 8], [1, 2]])
     },
     num_samples=1)
