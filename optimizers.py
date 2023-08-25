@@ -281,7 +281,10 @@ class EvolutionaryAlgorithm:
         #     raise
         # loads file with the best solution for testing
         fitness_list = []
-        best_solution = np.loadtxt(self.experiment_name + '/best_solution.txt')
+        # player_list = []
+        # enemy_list = []
+        # best_solution = np.loadtxt(self.experiment_name + '/best_solution.txt')
+        best_solution = np.loadtxt('/Users/Oleg_Litvinov1/Documents/Code/best_solution678.txt')
         for i in range(n_times):
             print('RUNNING SAVED BEST SOLUTION')
             self.env.update_parameter('speed', 'normal')
@@ -289,5 +292,11 @@ class EvolutionaryAlgorithm:
             fitness = self.evaluate_in_simulation([best_solution], gain_not_fitness=gain_not_fitness)
             fitness_list.append(fitness)
 
+            fitness, player_life, enemy_life, time = self.env.play(pcont=best_solution)
+            # player_list.append(player_life)
+            # enemy_list.append(enemy_life)
+
         np.savetxt(os.path.join(self.experiment_name, 'test_results.txt'), fitness_list)
+        # np.savetxt(os.path.join(self.experiment_name, 'player_life.txt'), player_list)
+        # np.savetxt(os.path.join(self.experiment_name, 'enemy_life.txt'), enemy_list)
         return fitness_list

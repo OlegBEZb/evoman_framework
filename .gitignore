@@ -3,4 +3,5 @@ __pycache__/
 *.pdf
 *.pyc
 .ipynb_checkpoints/ 
-.idea/ 
+experiments/*
+**.DS_Store

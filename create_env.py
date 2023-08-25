@@ -6,7 +6,7 @@ sys.path.insert(0, '/Users/Oleg_Litvinov1/Documents/Code/evoman_framework/evoman
 from environment import Environment
 from controllers import PlayerController
 
-def create_env(experiment_name, enemy_number):
+def create_env(experiment_name, enemy_number, multiplemode='yes'):
     hidden_layer_sizes = [10, 5]
     player_controller = PlayerController(hidden_layer_sizes)
     # initializes simulation in individual evolution mode, for single static enemy.
@@ -18,6 +18,6 @@ def create_env(experiment_name, enemy_number):
                       level=2,
                       speed="fastest",
                       visualmode="no",
-                      multiplemode='yes',
+                      multiplemode=multiplemode,
                       randomini='yes')
     return env
